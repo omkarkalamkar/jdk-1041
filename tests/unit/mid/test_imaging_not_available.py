@@ -57,10 +57,10 @@ def test_imaging_not_available(tango_context):
             MID_CSP_MLN_DEVICE,
             DISH_MASTER_DEVICE,
         ],
-        devFactory=DevFactory(),
+        dev_factory=DevFactory(),
         state=tango.DevState.OFF,
     )
     ensure_imaging(
-        cm, ModesAvailability.not_available, expected_elapsed_time=1.5
+        cm, ModesAvailability.NOT_AVAILABLE, expected_elapsed_time=1.5
     )
-    assert cm.component.imaging == ModesAvailability.not_available
+    assert cm.component.imaging == ModesAvailability.NOT_AVAILABLE

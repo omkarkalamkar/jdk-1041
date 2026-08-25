@@ -15,7 +15,6 @@ from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common import DevFactory, FaultType
 from ska_tmc_common.device_info import SubArrayDeviceInfo
 from ska_tmc_common.exceptions import CommandNotAllowed
-from tango import DevState
 
 from ska_tmc_centralnode.model.input import InputParameterMid
 from ska_tmc_centralnode.utils.json_validator_decorator import (
@@ -68,7 +67,9 @@ def test_assign_resources_command_completed(
     cm.dish_vcc_validation_status = MagicMock(
         return_value=DISH_VCC_VALIDATION_RESULT_STATUS
     )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.update_k_value_validation(
+        DISH_LEAF_NODE_DEVICE, ResultCode.OK
+    )
     result = cm.is_command_allowed("AssignResources")
     logger.info(f"Command allowed result is: {result}")
     cm.input_parameter.dish_leaf_node_dev_names = VALID_DISH_LNS
@@ -138,7 +139,9 @@ def test_assign_resources_command_with_mkt_ids_completed(
     cm.dish_vcc_validation_status = MagicMock(
         return_value=DISH_VCC_VALIDATION_RESULT_STATUS
     )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.update_k_value_validation(
+        DISH_LEAF_NODE_DEVICE, ResultCode.OK
+    )
     result = cm.is_command_allowed("AssignResources")
     logger.info(f"Command allowed result is: {result}")
     assign_input_str = get_assign_input_str()
@@ -185,7 +188,9 @@ def test_assign_resources_exception_on_sn(
     cm.dish_vcc_validation_status = MagicMock(
         return_value=DISH_VCC_VALIDATION_RESULT_STATUS
     )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.update_k_value_validation(
+        DISH_LEAF_NODE_DEVICE, ResultCode.OK
+    )
     cm.is_command_allowed("AssignResources")
     defect = {
         "enabled": True,
@@ -258,7 +263,9 @@ def test_assign_resources_command_with_ok(
     cm.dish_vcc_validation_status = MagicMock(
         return_value=DISH_VCC_VALIDATION_RESULT_STATUS
     )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.update_k_value_validation(
+        DISH_LEAF_NODE_DEVICE, ResultCode.OK
+    )
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     cm.assign_resources(
@@ -290,7 +297,9 @@ def test_assign_resources_command_with_mkt_ids_ok(
     cm.dish_vcc_validation_status = MagicMock(
         return_value=DISH_VCC_VALIDATION_RESULT_STATUS
     )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.update_k_value_validation(
+        DISH_LEAF_NODE_DEVICE, ResultCode.OK
+    )
     cm.is_command_allowed("AssignResources")
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -333,8 +342,6 @@ def test_assign_resources_command_fail_subarray(
 
     helper_adapter_factory = mock.Mock(**attrs)
 
-    # include exception in AssignResources command
-    attrs = {"AssignResources.side_effect": Exception}
     assign_input_str = json_factory("command_AssignResources")
     cm.adapter_factory = helper_adapter_factory
     cm.assign_resources(
@@ -361,7 +368,9 @@ def test_telescope_assign_resources_command_empty_input_json(
     cm.dish_vcc_validation_status = MagicMock(
         return_value=DISH_VCC_VALIDATION_RESULT_STATUS
     )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.update_k_value_validation(
+        DISH_LEAF_NODE_DEVICE, ResultCode.OK
+    )
     cm.is_command_allowed("AssignResources")
     decorated = assign_validate_json_args(cm.assign_resources)
 
@@ -379,7 +388,10 @@ def test_assign_resources_fail_check_allowed(
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    cm.op_state_model._op_state = DevState.FAULT
+    cm.config.op_state_model.perform_action("init_invoked")
+    cm.config.op_state_model.perform_action("component_on")
+    cm.config.op_state_model.perform_action("component_fault")
+    cm.config.op_state_model.perform_action("init_completed")
     with pytest.raises(CommandNotAllowed):
         cm.is_dish_vcc_config_set = True
         cm.is_command_allowed("AssignResources")
@@ -389,7 +401,7 @@ def test_assign_resources_command_timeout(
     tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
     cm, start_time = create_cm()
-    cm.command_timeout = 2
+    cm.config.timeout_config.command_timeout = 2
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -401,7 +413,9 @@ def test_assign_resources_command_timeout(
     cm.dish_vcc_validation_status = MagicMock(
         return_value=DISH_VCC_VALIDATION_RESULT_STATUS
     )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.update_k_value_validation(
+        DISH_LEAF_NODE_DEVICE, ResultCode.OK
+    )
     result = cm.is_command_allowed("AssignResources")
     logger.info(f"Command allowed result is: {result}")
 
@@ -449,11 +463,11 @@ def test_assign_resources_command_already_assigned(
     cm.is_command_allowed("AssignResources")
 
     # SKA001 is assigned to Subarray1
-    for devInfo in cm.devices:
-        if isinstance(devInfo, SubArrayDeviceInfo):
-            if devInfo.dev_name == MID_SUBARRAY_DEVICE:
-                devInfo.resources.append("SKA001")
-                logger.info("devInfo is: %s", devInfo.resources)
+    for dev_info in cm.devices:
+        if isinstance(dev_info, SubArrayDeviceInfo):
+            if dev_info.dev_name == MID_SUBARRAY_DEVICE:
+                dev_info.resources.append("SKA001")
+                logger.info("dev_info is: %s", dev_info.resources)
 
     # Invoke AssignResources to assign already allocated resource - dish0001
     assign_input_str = get_assign_input_str()
@@ -474,9 +488,9 @@ def test_assign_resources_command_already_assigned(
 def check_if_subarray_is_available(cm):
     start_time = time.time()
     elapsed_time = 0
-    while (cm.component.telescope_availability)["tmc_subarrays"][
-        MID_SUBARRAY_DEVICE
-    ] is not True:
+    while (cm.component.telescope_availability).get("tmc_subarrays", {}).get(
+        MID_SUBARRAY_DEVICE, None
+    ) is not True:
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
@@ -501,7 +515,9 @@ def test_mid_assign_resources_raises_state_model_exception(
     cm.dish_vcc_validation_status = MagicMock(
         return_value=DISH_VCC_VALIDATION_RESULT_STATUS
     )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.update_k_value_validation(
+        DISH_LEAF_NODE_DEVICE, ResultCode.OK
+    )
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     cm.assign_resources(

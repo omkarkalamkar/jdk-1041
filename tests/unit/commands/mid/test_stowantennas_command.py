@@ -133,7 +133,6 @@ def test_reset_stow_mode_data():
     assert not cm.dishln_stow_mode_cmd_exe_data
     assert not cm.number_of_stow_mode_executed
     assert not cm.command_in_progress
-    assert not cm.command_mapping
     cm.logger.debug.assert_called_once()
 
 
@@ -149,11 +148,10 @@ def test_get_current_dish_mode_of_dln():
     )
     mock_device = MagicMock()
     mock_device.dish_mode = expected_mode
-    cm._component = MagicMock()
-    cm._component.get_device.return_value = mock_device
+    cm.component = MagicMock()
+    cm.component.get_device.return_value = mock_device
     result = cm.get_current_dish_mode_of_dln(dish_id)
     cm.get_dish_leaf_node_device_names.assert_called_once()
-    cm._component.get_device.call_count >= 1
     assert result == expected_mode
 
 

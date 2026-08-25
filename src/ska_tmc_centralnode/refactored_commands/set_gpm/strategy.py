@@ -5,7 +5,7 @@ execution on the Dishes.
 """
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Dict, List, Tuple
 
 
 class GPMPrepError(Exception):
@@ -40,7 +40,7 @@ class GPMStrategy:
         self.gpm_unknown_dishes = gpm_unknown_dishes
         self.default_gpm_version_params = default_gpm_version_params
 
-    def build_plan(self, request: Any, gpm_files=None) -> GPMPlan:
+    def build_plan(self, request: Any, gpm_files=None) -> Tuple[GPMPlan, dict]:
         """Build the Global Pointing Model plan from the request.
 
         :param request: GPM request containing the required parameters.
@@ -75,16 +75,16 @@ class GPMStrategy:
         :return: GPM data and dishes for which no GPM files were found.
         :rtype: tuple[dict, dict]
         """
-        gpm_data = {}
-        no_gpm_files_found = {}
+        gpm_data: Dict[str, List[Dict[str, str]]] = {}
+        no_gpm_files_found: Dict[str, str] = {}
         try:
-            tm_data_source = dish_gpm_params.get("tm_data_sources", None)[0]
-            tm_data_fpath = dish_gpm_params.get("tm_data_filepath", None)
-            version = dish_gpm_params.get("version", None)
+            tm_data_source = dish_gpm_params.get("tm_data_sources", [])[0]
+            tm_data_fpath = dish_gpm_params.get("tm_data_filepath", "")
+            version = dish_gpm_params.get("version", "")
             self.logger.debug(
                 "GPM Files found on data repository: %s", gpm_files
             )
-            file_names = []
+            file_names: List[str] = []
             while self.gpm_unknown_dishes:
                 dish_id = self.gpm_unknown_dishes.pop()
                 dish_id = dish_id.lower()
@@ -126,7 +126,7 @@ class GPMStrategy:
         :return: Dictionary containing the GPM paths.
         :rtype: dict
         """
-        gpm_data = {}
+        gpm_data: Dict[str, List[Dict[str, str]]] = {}
         default_params = self.default_gpm_version_params
         tm_data_sources = default_params.get("tm_data_sources", None)[0]
         tm_data_sources = (

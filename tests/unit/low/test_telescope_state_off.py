@@ -73,7 +73,7 @@ def test_telescope_state_off(tango_context):
             LOW_CSP_MASTER_DEVICE,
             MCCS_CONTROLLER,
         ],
-        devFactory=DevFactory(),
+        dev_factory=DevFactory(),
         state=tango.DevState.OFF,
     )
     ensure_telescope_state(cm, tango.DevState.OFF, expected_elapsed_time=30)

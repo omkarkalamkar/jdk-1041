@@ -20,10 +20,8 @@ from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_internal_model_events_mid(
-    change_event_callbacks,
-    set_mid_sdp_csp_mln_availability_for_aggregation,
-):
+@pytest.mark.usefixtures("set_mid_sdp_csp_mln_availability_for_aggregation")
+def test_internal_model_events_mid():
     """Test internal model events for mid."""
     pytest.num_events_arrived = 0
 
@@ -70,9 +68,8 @@ def test_internal_model_events_mid(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_internal_model_events_low(
-    set_low_devices_availability_for_aggregation,
-):
+@pytest.mark.usefixtures("set_low_devices_availability_for_aggregation")
+def test_internal_model_events_low():
     """Test internal model events for low"""
     pytest.num_events_arrived = 0
 
@@ -143,9 +140,9 @@ def commands_result_events(change_event_callbacks, central_node_name):
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
+@pytest.mark.usefixtures("set_mid_sdp_csp_mln_availability_for_aggregation")
 def test_command_result_events_mid(
     change_event_callbacks,
-    set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     """Test command result events for mid."""
     commands_result_events(
@@ -157,9 +154,9 @@ def test_command_result_events_mid(
 @pytest.mark.skip(reason="Needs to be tested.")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
+@pytest.mark.usefixtures("set_low_sdp_csp_mln_availability_for_aggregation")
 def test_command_result_events_low(
     change_event_callbacks,
-    set_low_sdp_csp_mln_availability_for_aggregation,
 ):
     """Test command results event low"""
     commands_result_events(

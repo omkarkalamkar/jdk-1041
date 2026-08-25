@@ -9,7 +9,6 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
-from tango import DevState
 
 from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
 from ska_tmc_centralnode.utils.constants import MID_TMC_SUBARRAY
@@ -89,7 +88,7 @@ def test_telescope_off_command_fail_subarray(
 
     off_command = TelescopeOff(cm, my_adapter_factory, logger=logger)
     cm.adapter_factory = my_adapter_factory
-    off_command.telescope_off(logger=logger, task_callback=task_callback)
+    off_command.telescope_off(task_callback=task_callback)
     assert task_callback.status == TaskStatus.COMPLETED
     assert task_callback.result[0] == ResultCode.FAILED
 
@@ -123,7 +122,7 @@ def test_telescope_off_command_task_completed(
     task_callback = MockCallable(unique_id)
 
     off_command = TelescopeOff(cm, my_adapter_factory, logger=logger)
-    off_command.telescope_off(logger=logger, task_callback=task_callback)
+    off_command.telescope_off(task_callback=task_callback)
     time.sleep(0.1)
     assert task_callback.status == TaskStatus.COMPLETED
 
@@ -136,7 +135,10 @@ def test_telescope_off_fail_check_allowed(
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    cm.op_state_model._op_state = DevState.FAULT
+    cm.config.op_state_model.perform_action("init_invoked")
+    cm.config.op_state_model.perform_action("component_on")
+    cm.config.op_state_model.perform_action("component_fault")
+    cm.config.op_state_model.perform_action("init_completed")
     with pytest.raises(CommandNotAllowed):
         cm.is_dish_vcc_config_set = True
         cm.is_command_allowed("TelescopeOff")
@@ -155,10 +157,10 @@ def test_telescope_off_command_rejected(
     dev_info_dishln.update_unresponsive(True)
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("TelescopeOff")
-    with pytest.raises(Exception) as exception:
-        cm.is_command_allowed_before_lrc_start(command_name="TelescopeOff")
-        assert "'mid-tmc/leaf-node-dish/ska001' not available" in str(
-            exception
+    error_msg = r"'mid-tmc/leaf-node-dish/ska001'\] not available"
+    with pytest.raises(Exception, match=error_msg):
+        cm.cmd_allowed_validator.is_command_allowed_before_lrc_start(
+            command_name="TelescopeOff"
         )
 
 
@@ -200,7 +202,7 @@ def test_telescope_off_command_fail_dish(
 
     off_command = TelescopeOff(cm, my_adapter_factory, logger=logger)
     cm.adapter_factory = my_adapter_factory
-    off_command.telescope_off(logger=logger, task_callback=task_callback)
+    off_command.telescope_off(task_callback=task_callback)
     assert task_callback.status == TaskStatus.COMPLETED
     assert task_callback.result[0] == ResultCode.FAILED
     assert err_msg in task_callback.result[1]

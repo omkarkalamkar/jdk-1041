@@ -7,7 +7,7 @@ import threading
 import time
 from typing import Any, List, Optional, Tuple, Union
 
-from ska_control_model import TaskStatus
+from ska_control_model import ObsState, TaskStatus
 from ska_ser_logging import configure_logging
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
@@ -86,7 +86,7 @@ class CentralNodeCommand(TMCCommand):
 
         return result, message
 
-    def do(self, argin: Optional[str] = None) -> ResultCode:
+    def do(self, argin: Optional[str] = None) -> Tuple[ResultCode, str]:
         """Do method for central node command class"""
         if isinstance(
             self.component_manager.input_parameter, InputParameterMid
@@ -289,7 +289,7 @@ class CentralNodeCommand(TMCCommand):
                 callback = self.invoke_command_lrc_cb
             lrc_data = invoke_lrc(
                 callback(adapter.dev_name),
-                adapter._proxy,
+                adapter.proxy,
                 command_name,
                 command_args=(command_input,) if command_input else None,
                 logger=self.logger,
@@ -318,7 +318,8 @@ class CentralNodeCommand(TMCCommand):
     ):
         """This Method wait for desired obs state"""
         all_results_ok = False
-        end_time = time.monotonic() + self.component_manager.command_timeout
+        timeout = self.component_manager.config.timeout_config.command_timeout
+        end_time = time.monotonic() + timeout
         self.logger.debug(
             "Command subscription list %s", self.command_subs_list
         )
@@ -394,7 +395,8 @@ class CentralNodeCommand(TMCCommand):
             callback: function object to provided to invoke_lrc
         """
 
-        def callback(result=None, **kwargs):
+        def callback(**kwargs):
+            result = kwargs.get("result", None)
             LOGGER.debug(
                 "Received command result %s from device %s",
                 result,
@@ -417,6 +419,8 @@ class TelescopeOnOff(CentralNodeCommand):
         self,
         component_manager,
         adapter_factory=None,
+        timeout_subarrays: int = 3,
+        step_sleep: float = 0.1,
         *args,
         logger=None,
         **kwargs,
@@ -425,8 +429,10 @@ class TelescopeOnOff(CentralNodeCommand):
         self._adapter_factory = adapter_factory or AdapterFactory()
         self.csp_mln_adapter = None
         self.sdp_mln_adapter = None
-        self.subarray_adapters = []
-        self.dish_adapters = []
+        self.subarray_adapters: list = []
+        self.dish_adapters: list = []
+        self._timeout_subarrays = timeout_subarrays
+        self._step_sleep = step_sleep
 
     def init_adapters_mid(self) -> Tuple[ResultCode, str]:
         """
@@ -476,8 +482,8 @@ class TelescopeOnOff(CentralNodeCommand):
         for (
             dev_name
         ) in self.component_manager.input_parameter.subarray_dev_names:
-            devInfo = self.component_manager.get_device(dev_name)
-            if not devInfo.unresponsive:
+            dev_info = self.component_manager.get_device(dev_name)
+            if not dev_info.unresponsive:
                 try:
                     self.subarray_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
@@ -509,10 +515,9 @@ class TelescopeOnOff(CentralNodeCommand):
         for (
             dev_name
         ) in self.component_manager.input_parameter.dish_leaf_node_dev_names:
-            devInfo = self.component_manager.get_device(dev_name)
-            if not devInfo.unresponsive:
+            dev_info = self.component_manager.get_device(dev_name)
+            if not dev_info.unresponsive:
                 try:
-                    # import debugpy; debugpy.debug_this_thread()
                     self.dish_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
                             dev_name, AdapterType.DISH
@@ -602,8 +607,8 @@ class TelescopeOnOff(CentralNodeCommand):
         for (
             dev_name
         ) in self.component_manager.input_parameter.subarray_dev_names:
-            devInfo = self.component_manager.get_device(dev_name)
-            if not devInfo.unresponsive:
+            dev_info = self.component_manager.get_device(dev_name)
+            if not dev_info.unresponsive:
                 try:
                     self.subarray_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
@@ -629,324 +634,87 @@ class TelescopeOnOff(CentralNodeCommand):
 
         return ResultCode.OK, ""
 
-
-class AssignReleaseResources(CentralNodeCommand):
-    """AssignResources command class"""
-
-    def __init__(
-        self,
-        component_manager,
-        adapter_factory=None,
-        *args,
-        logger=None,
-        **kwargs,
-    ):
-        super().__init__(component_manager, logger=logger, *args, **kwargs)
-        self._adapter_factory = adapter_factory or AdapterFactory()
-        self.tm_subarray_adapter: Optional[AdapterFactory] = None
-        self.subarray_devname = ""
-        self.dish_adapters = []
-        self.subarray_adapters = []
-
-    def set_command_id(self, command_name: str) -> None:
-        """
-        Sets the command id for error propagation.
-
-        :param command_name: name of the command.
-        :type command_name: str
-        """
-        self.command_id = f"{time.time()}-{command_name}"
-        self.logger.info(
-            "Setting command id as %s for command: %s",
-            self.command_id,
-            command_name,
-        )
-
-    def get_subarray_adapter(self, subarray_id: int) -> Tuple[ResultCode, str]:
-        """
-        Method for obtaining the adapter for a subarray.
-
-        Args:
-            subarray_id (int): An integer representing
-              the subarray ID (1-16 typically).
-            telescope_type (str): The type of the telescope.
-
-        Returns:
-            Tuple[ResultCode, str]: (ResultCode, message)
-        """
-
-        subarray_adapter_dev_name = (
-            self.component_manager.subarray_trl_prefix
-            + str(subarray_id).zfill(2)
-        )
-
+    def wait_for_subarray_empty(self) -> Tuple[ResultCode, str]:
+        """Waits for subarray to move to Observation state EMPTY."""
         self.logger.debug(
-            "Command ID: %s | Attempting to get adapter for Subarray: %s",
-            self.command_id,
-            subarray_adapter_dev_name,
+            "Waiting for all subarray devices to reach the EMPTY "
+            "observation state."
         )
-
-        for adapter in self.subarray_adapters:
-            if adapter.dev_name == subarray_adapter_dev_name:
-                self.tm_subarray_adapter = adapter
-                self.subarray_devname = adapter.dev_name
-                return ResultCode.OK, ""
-
-        return (
-            ResultCode.FAILED,
-            f"Subarray Id {subarray_id}({subarray_adapter_dev_name}) is"
-            " not existing!",
-        )
-
-    def init_adapters_mid(self) -> Tuple[ResultCode, str]:
-        """
-        Initialises adapters for mid
-
-        Returns:
-            Tuple(ResultCode, str):
-            tuple of ResultCode and message.
-
-        """
-        self.dish_adapters = []
-        self.subarray_adapters = []
-        error_dev_names = []
-        num_working = 0
-
-        for (
-            dev_name
-        ) in self.component_manager.input_parameter.subarray_dev_names:
-            devInfo = self.component_manager.get_device(dev_name)
-            if not devInfo.unresponsive:
-                try:
-                    self.subarray_adapters.append(
-                        self._adapter_factory.get_or_create_adapter(
-                            dev_name, AdapterType.SUBARRAY
-                        )
-                    )
-                    num_working += 1
+        all_empty = False
+        start_time = time.time()
+        while not all_empty:
+            all_empty = True
+            for adapter in self.subarray_adapters:
+                obs_state = self.component_manager.get_device(
+                    adapter.dev_name
+                ).obs_state
+                if obs_state != ObsState.EMPTY:
                     self.logger.debug(
-                        "Adapter is created for SubarrayNode: %s ", dev_name
+                        "Subarray current ObsState %s, while "
+                        "waiting for ObsState.EMPTY. ",
+                        str(obs_state),
                     )
-                except Exception as e:
-                    self.logger.exception(
-                        "Exception in creating adapter for %s, Exception: %s",
-                        dev_name,
-                        str(e),
-                    )
-                    error_dev_names.append(dev_name)
-
-        if num_working == 0:
-            faulty_dev = ".".join(error_dev_names)
-            message = f"Error in creating tm subarray adapters {faulty_dev},"
-            return (
-                ResultCode.FAILED,
-                message,
-            )
-
-        error_dev_names = []
-        num_working = 0
-        for (
-            dev_name
-        ) in self.component_manager.input_parameter.dish_leaf_node_dev_names:
-            devInfo = self.component_manager.get_device(dev_name)
-            if not devInfo.unresponsive:
-                try:
-                    self.dish_adapters.append(
-                        self._adapter_factory.get_or_create_adapter(
-                            dev_name, AdapterType.DISH
-                        )
-                    )
-                    num_working += 1
-                    self.logger.debug(
-                        "Adapter is created for DishLeafNode: %s", dev_name
-                    )
-                except Exception as e:
-                    self.logger.exception(
-                        "Exception in creating adapter for %s, Exception: %s",
-                        dev_name,
-                        str(e),
-                    )
-                    error_dev_names.append(dev_name)
-
-        if num_working == 0:
-            return (
-                ResultCode.FAILED,
-                f"Error in creating dish adapters {'.'.join(error_dev_names)}",
-            )
-
-        return (ResultCode.OK, "")
-
-    def init_adapters_low(self) -> Tuple[ResultCode, str]:
-        """
-        Initialises adapter for central node low
-
-        Returns:
-            Tuple(ResultCode, str):
-            tuple of ResultCode and message.
-
-        """
-        self.mccs_mln_adapter = None
-        self.subarray_adapters = []
-
-        try:
-            self.mccs_mln_adapter = (
-                self._adapter_factory.get_or_create_adapter(
-                    self.component_manager.input_parameter.mccs_mln_dev_name,
-                    AdapterType.MCCS_MASTER_LEAF_NODE,
+                    all_empty = False
+            elapsed_time = time.time() - start_time
+            if elapsed_time > self._timeout_subarrays:
+                return (
+                    ResultCode.FAILED,
+                    "Timeout in waiting for subarrays devices to be empty",
                 )
+            time.sleep(self._step_sleep)
+        return ResultCode.OK, ""
+
+    def return_result(
+        self, unavailable_devices: list
+    ) -> Tuple[ResultCode, str]:
+        """Return relevant result code and message."""
+        if unavailable_devices:
+            self.logger.info(
+                "Unavailable devices are %s ", unavailable_devices
             )
-        except Exception as e:
             return (
-                self.component_manager.input_parameter.mccs_mln_dev_name,
-                e,
+                ResultCode.OK,
+                f"Unavailable devices are {unavailable_devices}",
             )
 
-        error_dev_names = []
-        num_working = 0
+        return (ResultCode.OK, "Command Completed")
 
-        for (
-            dev_name
-        ) in self.component_manager.input_parameter.subarray_dev_names:
-            devInfo = self.component_manager.get_device(dev_name)
-            if not devInfo.unresponsive:
-                try:
-                    self.subarray_adapters.append(
-                        self._adapter_factory.get_or_create_adapter(
-                            dev_name, AdapterType.SUBARRAY
-                        )
-                    )
-                    num_working += 1
-                except Exception as e:
-                    self.logger.exception(
-                        "Exception in creating adapter for %s, Exception: %s",
-                        dev_name,
-                        str(e),
-                    )
-                    error_dev_names.append(dev_name)
-
-        if num_working == 0:
-            faulty_dev = ".".join(error_dev_names)
-            message = f"Error in creating tm subarray adapters {faulty_dev},"
-            return (ResultCode.FAILED, message)
-
-        return (ResultCode.OK, "")
-
-    def put_result_in_command_mapping_dict(
-        self, return_codes, message_or_unique_ids
-    ):
-        """Update command_mapping dictionary to add the ResultCode and
-        unique_id for the command executed"""
-
+    def process_resultcode_devices(
+        self,
+        unavailable_devices: list,
+        return_codes: list,
+        message_or_unique_ids: list,
+    ) -> Tuple[ResultCode, str]:
+        """Process the device resultcodes after command invocation."""
         for return_code, message_or_unique_id in zip(
             return_codes, message_or_unique_ids
         ):
-            if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
-                return (
-                    ResultCode.FAILED,
-                    message_or_unique_id,
-                )
+            # condition for exception raised during invoking command
+            if return_code in [ResultCode.FAILED]:
+                return ResultCode.FAILED, message_or_unique_id
+            # condition for unavailable devices
+            if return_code in [ResultCode.REJECTED]:
+                unavailable_devices.append(message_or_unique_id.split(" ")[0])
+        return ResultCode.OK, ""
 
-            # even if command is rejected by subarraynode ,
-            # it will be resultcode failed for centralnode
-            if return_code in [ResultCode.QUEUED, ResultCode.OK]:
-                if self.component_manager.command_mapping.get(self.command_id):
-                    self.logger.debug(
-                        "Command ID: %s |"
-                        + " Adding the ID %s to the command mapping"
-                        + " dictionary under command_id: %s",
-                        self.command_id,
-                        message_or_unique_id,
-                        self.command_id,
-                    )
-                    self.component_manager.command_mapping[
-                        self.command_id
-                    ].append(message_or_unique_id)
-                else:
-                    self.logger.debug(
-                        "Command ID: %s |"
-                        + " Creating a command mapping dictionary for id: "
-                        + "%s, with unique_id: %s",
-                        self.command_id,
-                        self.command_id,
-                        message_or_unique_id,
-                    )
-                    self.component_manager.command_mapping[self.command_id] = [
-                        message_or_unique_id
-                    ]
-        return (ResultCode.OK, "")
-
-
-class LoadDishCfgCommand(CentralNodeCommand):
-    """This command class for LoadDishConfig command which
-    load dishid-vcc map json from CAR and pass it to CSP Master
-    """
-
-    def __init__(
+    def update_callback(
         self,
-        component_manager,
-        adapter_factory: Optional[AdapterFactory] = None,
-        *args,
-        logger=None,
-        **kwargs,
-    ):
-        super().__init__(component_manager, *args, logger=logger, **kwargs)
-        self._adapter_factory = adapter_factory or AdapterFactory()
-        self.csp_mln_adapter = None
-        self.sdp_mln_adapter = None
-        self.subarray_adapters = []
-        self.dish_adapters = []
-
-    def init_adapters_mid(self) -> Tuple[ResultCode, str]:
-        """Initialises Adapters for mid"""
-        self.csp_mln_adapter: Optional[AdapterFactory] = None
-        self.sdp_mln_adapter: Optional[AdapterFactory] = None
-        self.subarray_adapters: Optional[AdapterFactory] = []
-        self.dish_adapters = []
-        try:
-            self.csp_mln_adapter = self._adapter_factory.get_or_create_adapter(
-                self.component_manager.input_parameter.csp_mln_dev_name,
-                AdapterType.CSP_MASTER_LEAF_NODE,
+        task_callback: TaskCallbackType,
+        result_code: ResultCode,
+        message: str,
+    ) -> None:
+        """Update taskcallback based on resultcode and message"""
+        if result_code == ResultCode.FAILED:
+            task_callback(
+                status=TaskStatus.COMPLETED,
+                result=(ResultCode.FAILED, message),
+                exception=Exception(message),
             )
-            self.logger.debug(
-                "Adapter is created for CSP Master Leaf Node: %s",
-                self.component_manager.input_parameter.csp_mln_dev_name,
+        else:
+            task_callback(
+                status=TaskStatus.COMPLETED,
+                result=(ResultCode.OK, message),
             )
-        except Exception as e:
-            return self.adapter_error_message(
-                self.component_manager.input_parameter.csp_mln_dev_name,
-                e,
-            )
-        error_dev_names = []
-        num_working = 0
-        for (
-            dev_name
-        ) in self.component_manager.input_parameter.dish_leaf_node_dev_names:
-            devInfo = self.component_manager.get_device(dev_name)
-            if not devInfo.unresponsive:
-                try:
-                    self.dish_adapters.append(
-                        self._adapter_factory.get_or_create_adapter(
-                            dev_name, AdapterType.DISH
-                        )
-                    )
-                    num_working += 1
-                    self.logger.debug(
-                        "Adapter is created for DishLeafNode: %s", dev_name
-                    )
-                except Exception as e:
-                    self.logger.exception(
-                        "Exception in creating adapter for %s, Exception: %s",
-                        dev_name,
-                        str(e),
-                    )
-                    error_dev_names.append(dev_name)
-
-        if num_working == 0:
-            return (
-                ResultCode.FAILED,
-                f"Error in creating dish adapters {'.'.join(error_dev_names)}",
-            )
-        return (ResultCode.OK, "")
 
 
 class SetDishGPM(CentralNodeCommand):
@@ -980,8 +748,8 @@ class SetDishGPM(CentralNodeCommand):
         for (
             dev_name
         ) in self.component_manager.input_parameter.dish_leaf_node_dev_names:
-            devInfo = self.component_manager.get_device(dev_name)
-            if not devInfo.unresponsive:
+            dev_info = self.component_manager.get_device(dev_name)
+            if not dev_info.unresponsive:
                 try:
                     self.dish_adapters.append(
                         self._adapter_factory.get_or_create_adapter(

@@ -1,11 +1,11 @@
 """Command class for TelescopeOn()"""
 
-import logging
 import threading
-from typing import Callable, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
+from ska_tango_base.type_hints import TaskCallbackType
 from ska_tmc_common.enum import DishMode
 from tango import DevState
 
@@ -25,8 +25,6 @@ class TelescopeOn(TelescopeOnOff):
         self,
         component_manager,
         adapter_factory=None,
-        timeout_mccs=3,
-        step_sleep=0.1,
         *args,
         logger=None,
         **kwargs,
@@ -38,8 +36,7 @@ class TelescopeOn(TelescopeOnOff):
 
     def telescope_on(
         self,
-        logger: logging.Logger,
-        task_callback: Callable = None,
+        task_callback: TaskCallbackType,
         task_abort_event: Optional[threading.Event] = None,
     ) -> Tuple[ResultCode, str]:
         """
@@ -53,6 +50,8 @@ class TelescopeOn(TelescopeOnOff):
             task_abort_event: Check for abort, defaults to None
 
         """
+        if task_abort_event:
+            self.task_abort_event = task_abort_event
         # Indicate that the task has started
         task_callback(status=TaskStatus.IN_PROGRESS)
         self.logger.info(
@@ -65,17 +64,7 @@ class TelescopeOn(TelescopeOnOff):
             self.component_manager.command_id,
             result_code.name,
         )
-        if result_code == ResultCode.FAILED:
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=(ResultCode.FAILED, message),
-                exception=message,
-            )
-        else:
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=(ResultCode.OK, message),
-            )
+        self.update_callback(task_callback, result_code, message)
 
         return result_code, message
 
@@ -106,36 +95,19 @@ class TelescopeOn(TelescopeOnOff):
             "Device states before executing TelescopeOn command"
         )
 
-        unavailable_devices = []
+        unavailable_devices: list = []
         for return_codes, message_or_unique_ids in [
             self.set_standby_fp_mode_dishes(),
             self.turn_on_csp(),
             self.turn_on_sdp(),
             self.turn_on_subarrays(),
         ]:
-            for return_code, message_or_unique_id in zip(
-                return_codes, message_or_unique_ids
-            ):
-                # condition for exception raised during invoking command
-                if return_code in [ResultCode.FAILED]:
-                    return ResultCode.FAILED, message_or_unique_id
-                # condition for unavailable devices
-                if return_code in [ResultCode.REJECTED]:
-                    # return ResultCode.FAILED, message_or_unique_id
-                    unavailable_devices.append(
-                        message_or_unique_id.split(" ")[0]
-                    )
-
-        if unavailable_devices:
-            self.logger.info(
-                "Unavailable devices are %s ", unavailable_devices
+            resultcode_msg = self.process_resultcode_devices(
+                unavailable_devices, return_codes, message_or_unique_ids
             )
-            return (
-                ResultCode.OK,
-                f"Unavailable devices are {unavailable_devices}",
-            )
-
-        return (ResultCode.OK, "Command Completed")
+            if resultcode_msg[0] == ResultCode.FAILED:
+                return resultcode_msg
+        return self.return_result(unavailable_devices)
 
     def turn_on_sdp(self) -> Tuple[List[ResultCode], List[str]]:
         """
@@ -261,37 +233,21 @@ class TelescopeOn(TelescopeOnOff):
             "Device states before executing TelescopeOn command"
         )
         # send commands to sub-devices
-        # import debugpy; debugpy.debug_this_thread()
-        unavailable_devices = []
+        unavailable_devices: list = []
         for return_codes, message_or_unique_ids in [
             self.turn_on_mccs(),
             self.turn_on_subarrays(),
             self.turn_on_csp(),
             self.turn_on_sdp(),
         ]:
-            for return_code, message_or_unique_id in zip(
-                return_codes, message_or_unique_ids
-            ):
-                # condition for exception raised during invoking command
-                if return_code in [ResultCode.FAILED]:
-                    return ResultCode.FAILED, message_or_unique_id
-                # condition for unavailable devices
-                if return_code in [ResultCode.REJECTED]:
-                    # return ResultCode.FAILED, message_or_unique_id
-                    unavailable_devices.append(
-                        message_or_unique_id.split(" ")[0]
-                    )
-
-        if unavailable_devices:
-            self.logger.info(
-                "Unavailable devices are: %s", unavailable_devices
+            # condition for exception raised during invoking command
+            resultcode_msg = self.process_resultcode_devices(
+                unavailable_devices, return_codes, message_or_unique_ids
             )
-            return (
-                ResultCode.OK,
-                f"Unavailable devices are {unavailable_devices}",
-            )
+            if resultcode_msg[0] == ResultCode.FAILED:
+                return resultcode_msg
 
-        return (ResultCode.OK, "Command Completed")
+        return self.return_result(unavailable_devices)
 
     def turn_on_mccs(self) -> Tuple[List[ResultCode], List[str]]:
         """
@@ -320,5 +276,5 @@ class TelescopeOn(TelescopeOnOff):
             ],
         )
 
-    def update_task_status(self):
+    def update_task_status(self, **kwargs):
         """Updates task status implemented to"""

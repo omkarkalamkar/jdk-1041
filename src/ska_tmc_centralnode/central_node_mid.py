@@ -8,23 +8,30 @@ of state and mode attributes defined by the SKA Control Model.
 import json
 import os
 from threading import Event
-from typing import List, Tuple
 
-from ska_control_model import ResultCode
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.long_running_commands import (
     LRCReqType,
     long_running_command,
 )
 from ska_tango_base.software_bus import Signal, attribute_from_signal
+from ska_tango_base.type_hints import TaskFunctionType
 from ska_tmc_common.op_state_model import TMCOpStateModel
 from tango import AttrWriteType, DebugIt
 from tango.server import attribute, device_property, run
 
 from ska_tmc_centralnode.central_node import AbstractCentralNode
+from ska_tmc_centralnode.manager.component_manager_config import (
+    ArrayLayoutConfig,
+    DishVccConfig,
+    GPMConfig,
+    MidCentralNodeComponentManagerConfig,
+    TimeoutConfig,
+)
 from ska_tmc_centralnode.manager.component_manager_mid import (
     CNComponentManagerMid,
 )
+from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import DishConfigStatus, ModesAvailability
 from ska_tmc_centralnode.model.input import InputParameterMid
 from ska_tmc_centralnode.utils.json_validator_decorator import (
@@ -32,6 +39,8 @@ from ska_tmc_centralnode.utils.json_validator_decorator import (
 )
 
 __all__ = ["MidTmcCentralNode", "main"]
+
+# pylint:disable=invalid-name #Due to tango camel case
 
 
 class MidTmcCentralNode(AbstractCentralNode):
@@ -49,7 +58,7 @@ class MidTmcCentralNode(AbstractCentralNode):
     DishIDs = device_property(
         dtype=("str",),
         doc="List of the available dish ids",
-        default_value=tuple(),
+        default_value=(),
     )
 
     DishLeafNodePrefix = device_property(
@@ -61,7 +70,7 @@ class MidTmcCentralNode(AbstractCentralNode):
     DishMasterFQDNs = device_property(
         dtype=("str",),
         doc="List of Dish Master devices",
-        default_value=tuple(),
+        default_value=(),
     )
 
     DishMasterIdentifier = device_property(
@@ -147,17 +156,8 @@ class MidTmcCentralNode(AbstractCentralNode):
     # Attributes
     # ----------
 
-    _imaging: Signal[ModesAvailability] = Signal[ModesAvailability](
-        stored=True, initial_value=ModesAvailability.not_available
-    )
-
-    def read_imaging(self):
-        """Read Attribute for imaging"""
-        return self.component_manager.component.imaging
-
     imaging = attribute_from_signal(
-        _imaging,
-        fget=read_imaging,
+        "_component_manager.component._imaging",
         dtype=ModesAvailability,
         description="Imaging Attribute",
         access=AttrWriteType.READ,
@@ -181,115 +181,30 @@ class MidTmcCentralNode(AbstractCentralNode):
         stored=True, initial_value=True
     )
 
-    def read_isDishVccConfigSet(self):
-        """Return the isDishVccConfigSet attribute."""
-        return self.component_manager.is_dish_vcc_config_set
-
     isDishVccConfigSet = attribute_from_signal(
-        _is_dish_vcc_config_set,
-        fget=read_isDishVccConfigSet,
+        "_component_manager._is_dish_vcc_config_set",
         dtype=bool,
         access=AttrWriteType.READ,
     )
 
-    _dish_vcc_command_status: Signal[DishConfigStatus] = Signal[
-        DishConfigStatus
-    ](stored=True, initial_value=DishConfigStatus.STAGING)
-
-    def read_DishVccCommandStatus(self):
-        """Return the DishVccCommandStatus attribute."""
-        return self.component_manager.dish_vcc_command_status
-
     DishVccCommandStatus = attribute_from_signal(
-        _dish_vcc_command_status,
-        fget=read_DishVccCommandStatus,
+        "_component_manager._dish_vcc_command_status",
         dtype=DishConfigStatus,
         access=AttrWriteType.READ,
     )
 
-    _dish_vcc_validation_status: Signal[str] = Signal[str](
-        stored=True, initial_value=""
-    )
-
-    def read_DishVccValidationStatus(self):
-        """Return the DishVccValidationStatus"""
-        return self.component_manager.dish_vcc_validation_status
-
     DishVccValidationStatus = attribute_from_signal(
-        _dish_vcc_validation_status,
-        fget=read_DishVccValidationStatus,
+        "_component_manager._dish_vcc_validation_status",
         dtype=str,
         access=AttrWriteType.READ,
     )
-
-    _global_pointing_model_status: Signal[str] = Signal[str](
-        stored=True, initial_value=""
-    )
-
-    def read_GlobalPointingModelStatus(self):
-        """Return the GlobalPointingModelStatus attribute."""
-        return json.dumps(self.component_manager.global_pointing_model_status)
 
     GlobalPointingModelStatus = attribute_from_signal(
-        _dish_vcc_validation_status,
-        fget=read_GlobalPointingModelStatus,
+        "_component_manager._global_pointing_model_status",
         dtype=str,
         access=AttrWriteType.READ,
+        to_tango=json.dumps,
     )
-
-    def update_imaging_callback(self, imaging):
-        """Callback for Update imaging"""
-        self.logger.debug("Imaging %s", imaging)
-        self._imaging = imaging
-
-    def update_dishvccconfig_callback(self, isdishvccconfigset):
-        """Update isDishVccConfigSet callbacks"""
-        try:
-            self._is_dish_vcc_config_set = isdishvccconfigset
-
-        except Exception as exception:
-            self.logger.exception(
-                "Exception while updating isDishVccConfigSet: %s",
-                exception,
-            )
-
-    def dishvcccommandstatus_cb(
-        self, dish_vcc_command_status: DishConfigStatus
-    ) -> None:
-        """
-        Update dish_vcc_command_status callbacks
-
-        Args:
-            dish_vcc_command_status (DishConfigStatus):
-                Dish VCC command status
-
-        """
-        try:
-            self._dish_vcc_command_status = dish_vcc_command_status
-
-        except Exception as exception:
-            self.logger.exception(
-                "Exception while pushing event for "
-                "Dish Vcc command status: %s",
-                exception,
-            )
-
-    def dishvccvalidation_callback(self, dishvccvalidationstatus) -> None:
-        """
-        Update DishVccValidationStatus callbacks
-
-        Args:
-            dishvccvalidationstatus: Dish VCC Validation status
-
-        """
-        try:
-            self._dish_vcc_validation_status = dishvccvalidationstatus
-        except Exception as exception:
-            self.logger.exception(
-                "Exception while pushing event for "
-                "Dish Vcc Validation Status: %s",
-                exception,
-            )
 
     # ---------------
     # General methods
@@ -311,71 +226,66 @@ class MidTmcCentralNode(AbstractCentralNode):
         """Read attribute value of vlbi"""
         return self.component_manager.component.vlbi
 
-    def create_component_manager(self):
+    def _get_component_manager_config(
+        self,
+    ) -> MidCentralNodeComponentManagerConfig:
+        """Provides the configuration for component manager Mid.
+
+        :return: Instance of MidCentralNodeComponentManagerConfig.
+        :rtype: MidCentralNodeComponentManagerConfig
         """
-        Creates and configures the Component Manager for this device.
-        :return: The configured Component Manager instance.
-        :rtype: CNComponentManagerMid
-        """
+        _component = CentralComponent(logger=self.logger)
+
+        _component.shared_bus = self.shared_bus
         self.op_state_model = TMCOpStateModel(
             logger=self.logger, callback=super()._update_state
         )
-
         default_array_layout_url_dict = {
             "source_uris": [self.DefaultArrayLayoutSourceURIs],
             "array_layout_path": self.DefaultArrayLayoutPath,
         }
-
-        cm = CNComponentManagerMid(
-            self.op_state_model,
-            _input_parameter=InputParameterMid(None),
+        return MidCentralNodeComponentManagerConfig(
+            component=_component,
+            op_state_model=self.op_state_model,
+            input_parameter=InputParameterMid(None),
             logger=self.logger,
-            _dish_vcc_command_status_callback=self.dishvcccommandstatus_cb,
-            _update_device_callback=self.update_device_callback,
-            _update_telescope_state_callback=(
-                self.update_telescope_state_callback
+            dish_config=DishVccConfig(
+                uri=self.DishVccUri if self.DishVccUri else "",
+                file_path=self.DishVccFilePath if self.DishVccFilePath else "",
+                init_timeout=self.DishVccInitTimeout,
+                dish_k_value_aggregation_allowed_precent=(
+                    self.DishKvalueAggregationAllowedPercent
+                ),
+                k_value_valid_range_lower_limit=(
+                    self.KValueValidRangelowerLimit
+                ),
+                k_value_valid_range_upper_limit=(
+                    self.KValueValidRangeUpperLimit
+                ),
+                invoke_command_callback=(
+                    self.invoke_load_dish_cfg_command_callback
+                ),
+                enable_init=self.EnableDishVccInit,
             ),
-            _update_telescope_health_state_callback=(
-                self.update_telescope_health_state_callback
+            gpm_config=GPMConfig(
+                version=self.GPMVersion,
+                interface=self.GPMInterface,
+                data_sources_prefix=self.GPMDataSourcesPrefix,
+                file_path_prefix=self.GPMFilePathPrefix,
+                invoke_command_callback=self.invoke_set_gpm_command_callback,
             ),
-            _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
-            _update_imaging_callback=self.update_imaging_callback,
-            _telescope_availability_callback=(
-                self.update_telescope_availability_callback
+            timeout_config=TimeoutConfig(
+                command_timeout=self.CommandTimeOutDefault,
+                proxy_timeout=self.ProxyTimeout,
+                event_subscription_check_period=(
+                    self.EventSubscriptionCheckPeriod
+                ),
+                liveliness_check_period=self.LivelinessCheckPeriod,
             ),
-            array_layout_url_callback=self.update_array_layout_url_callback,
-            default_array_layout_url_callback=(
-                self.update_default_array_layout_url_callback
+            array_layout_config=ArrayLayoutConfig(
+                default_url=default_array_layout_url_dict,
             ),
-            _update_dishvccconfig_callback=self.update_dishvccconfig_callback,
-            _dishvccvalidation_callback=self.dishvccvalidation_callback,
-            command_timeout=self.CommandTimeOutDefault,
-            proxy_timeout=self.ProxyTimeout,
-            event_subscription_check_period=self.EventSubscriptionCheckPeriod,
-            liveliness_check_period=self.LivelinessCheckPeriod,
-            dish_vcc_uri=self.DishVccUri if self.DishVccUri else "",
-            dish_vcc_file_path=(
-                self.DishVccFilePath if self.DishVccFilePath else ""
-            ),
-            dish_vcc_init_timeout=self.DishVccInitTimeout,
-            dishKvalueAggregationAllowedPercent=(
-                self.DishKvalueAggregationAllowedPercent
-            ),
-            k_value_valid_range_upper_limit=self.KValueValidRangeUpperLimit,
-            k_value_valid_range_lower_limit=self.KValueValidRangelowerLimit,
-            invoke_load_dish_cfg_command_callback=(
-                self.invoke_load_dish_cfg_command_callback
-            ),
-            invoke_set_gpm_command_callback=(
-                self.invoke_set_gpm_command_callback
-            ),
-            enable_dish_vcc_init=self.EnableDishVccInit,
             subarray_trl_prefix=self.SubarrayPrefix,
-            gpm_version=self.GPMVersion,
-            gpm_interface=self.GPMInterface,
-            gpm_data_sources_prefix=self.GPMDataSourcesPrefix,
-            gpm_file_path_prefix=self.GPMFilePathPrefix,
-            default_array_layout_url=default_array_layout_url_dict,
             mkt_extension_id=self.MeerKatExtensionID,
             ska_dish_ranges=(
                 self.SkaDishIdLowerLimit,
@@ -387,6 +297,12 @@ class MidTmcCentralNode(AbstractCentralNode):
             ),
         )
 
+    def _update_fqdns(self, cm: CNComponentManagerMid) -> None:
+        """Updates the FQDN's in input parameter.
+
+        :param cm: Instance of CNComponentManagerMid.
+        :type cm: CNComponentManagerMid
+        """
         cm.input_parameter.dish_leaf_node_dev_names = []
         cm.input_parameter.dish_dev_names = []
         for dish in self.DishIDs:
@@ -407,6 +323,17 @@ class MidTmcCentralNode(AbstractCentralNode):
         cm.input_parameter.dish_leaf_node_prefix = self.DishLeafNodePrefix
         cm.input_parameter.dish_master_identifier = self.DishMasterIdentifier
 
+    def create_component_manager(self):
+        """
+        Creates and configures the Component Manager for this device.
+        :return: The configured Component Manager instance.
+        :rtype: CNComponentManagerMid
+        """
+        self.op_state_model = TMCOpStateModel(
+            logger=self.logger, callback=super()._update_state
+        )
+        cm = CNComponentManagerMid(self._get_component_manager_config())
+        self._update_fqdns(cm)
         cm.update_input_parameter()
         cm.setup_event_subscription()
         return cm
@@ -429,8 +356,9 @@ class MidTmcCentralNode(AbstractCentralNode):
             json.dumps(self.component_manager.get_default_gpm_version_params())
         )
 
+    # pylint: disable=unused-argument
     def is_LoadDishCfg_allowed(
-        self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+        self, request_type: LRCReqType | None = None
     ) -> bool:
         """
         Checks whether LoadDishCfg command is allowed to be run
@@ -440,10 +368,12 @@ class MidTmcCentralNode(AbstractCentralNode):
         """
         return True
 
+    # pylint: enable=unused-argument
+
     @validate_dish_vcc_command_status
     @long_running_command
     @DebugIt()
-    def LoadDishCfg(self, argin: str) -> Tuple[List[ResultCode], List[str]]:
+    def LoadDishCfg(self, argin: str) -> TaskFunctionType:
         """
         LoadDishCfg command to load dishID-vcc map config.
         This command get dishid-vcc map json string from Telmodel
@@ -474,8 +404,9 @@ class MidTmcCentralNode(AbstractCentralNode):
 
         return task
 
+    # pylint: disable=unused-argument
     def is_SetGlobalPointingModel_allowed(
-        self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+        self, request_type: LRCReqType | None = None
     ) -> bool:
         """
         Checks whether setGlobalPointingModel command is allowed to be run
@@ -485,11 +416,11 @@ class MidTmcCentralNode(AbstractCentralNode):
         """
         return True
 
+    # pylint: enable=unused-argument
+
     @long_running_command
     @DebugIt()
-    def SetGlobalPointingModel(
-        self, argin: str
-    ) -> Tuple[List[ResultCode], List[str]]:
+    def SetGlobalPointingModel(self, argin: str) -> TaskFunctionType:
         """
         SetGlobalPointingModel command to send the GPM URI to dish leaf
         nodes. This command gets a dictionary in following form:
@@ -532,8 +463,9 @@ class MidTmcCentralNode(AbstractCentralNode):
 
         return task
 
+    # pylint: disable=unused-argument
     def is_SetStowMode_allowed(
-        self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+        self, request_type: LRCReqType | None = None
     ) -> bool:
         """
         Checks whether setStowMode command is allowed to be run
@@ -543,9 +475,11 @@ class MidTmcCentralNode(AbstractCentralNode):
         """
         return True
 
+    # pylint: enable=unused-argument
+
     @long_running_command
     @DebugIt()
-    def SetStowMode(self, argin: str) -> Tuple[List[ResultCode], List[str]]:
+    def SetStowMode(self, argin: str) -> TaskFunctionType:
         """
         SetStowMode command to send the stow mode command to dish leaf
         nodes. This command gets a list in following form:
@@ -568,6 +502,8 @@ class MidTmcCentralNode(AbstractCentralNode):
 
         return task
 
+
+# pylint:enable=invalid-name
 
 # ----------
 # Run server

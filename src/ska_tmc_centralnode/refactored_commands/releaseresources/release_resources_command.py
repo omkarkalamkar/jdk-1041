@@ -7,7 +7,7 @@ behaviour shared between the Mid and Low telescope commands
 
 import logging
 
-from ska_control_model import ObsState, ResultCode, TaskStatus
+from ska_control_model import ObsState
 from ska_tmc_common import AdapterFactory
 from ska_tmc_common.adapters import AdapterType
 from ska_tmc_common.v4.command_context import DeviceCommand
@@ -42,7 +42,7 @@ class BaseReleaseResourcesCN(BaseCNCommand):
         :type logger: logging.Logger
         """
         super().__init__(command_runtime_context, adapter_provider, logger)
-        self.subarray_id: int | None = None
+        self.subarray_id: int = 0
         self._plan: LRP | MRP | None = None
 
     def get_subarray_obsstate(self) -> ObsState:
@@ -50,7 +50,7 @@ class BaseReleaseResourcesCN(BaseCNCommand):
         This method returns obsstate of subarray.
         """
         return self.command_runtime_context.obs_state_ctx.get(
-            self.get_subarray_name(int(self.subarray_id))
+            self.get_subarray_name(self.subarray_id)
         )
 
     def is_state_complete(self) -> bool:
@@ -70,27 +70,7 @@ class BaseReleaseResourcesCN(BaseCNCommand):
         """
 
         return DeviceCommand(
-            self.get_subarray_name(int(self.subarray_id)),
+            self.get_subarray_name(self.subarray_id),
             self.command_name,
             AdapterType.SUBARRAY,
         )
-
-    def update_task_status(self, **kwargs) -> None:
-        """Update task status for ReleaseResourcesLow."""
-        result = kwargs.get("result")
-        status = kwargs.get("status", TaskStatus.COMPLETED)
-        exception = kwargs.get("exception", "")
-
-        if status == TaskStatus.ABORTED:
-            self.context.task_callback(
-                result=(ResultCode.ABORTED, "Command has been aborted"),
-                status=status,
-            )
-        elif result[0] == ResultCode.OK:
-            self.context.task_callback(result=result, status=status)
-        else:
-            self.context.task_callback(
-                result=(ResultCode.FAILED, result[1]),
-                status=status,
-                exception=exception,
-            )

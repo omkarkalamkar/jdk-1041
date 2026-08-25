@@ -8,25 +8,26 @@ import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_testing.mock.placeholders import Anything
-from ska_tmc_common.dev_factory import DevFactory
 
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_LOW,
     CENTRALNODE_MID,
 )
-from tests.integration.conftest import ensure_checked_devices
+from tests.integration.conftest import get_cn_sn
 from tests.settings import (
     ERROR_PROPAGATION_DEFECT,
-    LOW_CENTRAL_NODE,
     LOW_SUBARRAY_DEVICE,
     MID_SUBARRAY_DEVICE,
-    RESET_DEFECT,
     SLEEP_TIME,
     TIMEOUT,
     TIMEOUT_DEFECT,
-    check_subarray_availability,
+    TIMEOUT_MSG,
+    assert_exception,
+    clean_up_subarray,
     logger,
     set_auto_recovery_for_low,
+    telescope_off,
+    telescope_on,
 )
 
 
@@ -38,39 +39,14 @@ def assign_resources(
     subarray_device,
 ):
     """AssignResources Test method."""
-
-    dev_factory = DevFactory()
-    central_node = dev_factory.get_device(central_node_name)
-    subarray_proxy = dev_factory.get_device(subarray_device)
-
-    ensure_checked_devices(central_node)
+    central_node, subarray_proxy, _ = get_cn_sn(central_node_name)
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-    result, unique_id = central_node.TelescopeOn()
-    logger.info(
-        "Telscope On Command ID: %s Returned result: %s",
-        unique_id,
-        str(result),
-    )
-
-    assert unique_id[0].endswith("TelescopeOn")
-    assert result[0] == ResultCode.QUEUED
-
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=4,
-    )
-
-    subarray_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node, subarray_device, True)
-
-    if "mid-tmc" in central_node_name:
-        result, unique_id = central_node.AssignResources(assign_input_str)
-    else:
-        result, unique_id = central_node.AssignResources(assign_input_str)
+    telescope_on(central_node, change_event_callbacks)
+    result, unique_id = central_node.AssignResources(assign_input_str)
     logger.info(
         "AssignResources Command ID: %s Returned result: %s",
         unique_id,
@@ -108,10 +84,9 @@ def assign_resources(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
-    tmc_subarray = dev_factory.get_device(subarray_device)
-    tmc_subarray.SetDirectObsState(ObsState.EMPTY)
+    subarray_proxy.SetDirectObsState(ObsState.EMPTY)
 
-    result, unique_id = central_node.TelescopeOff()
+    telescope_off(central_node, change_event_callbacks)
 
 
 @pytest.mark.post_deployment
@@ -124,13 +99,15 @@ def assign_resources(
         (CENTRALNODE_MID, "command_AssignResources_2_1"),
     ],
 )
+@pytest.mark.usefixtures(
+    "set_mid_sdp_csp_mln_availability_for_aggregation",
+    "set_mid_sdp_csp_admin_modes",
+)
 def test_assign_res_command_mid(
     central_node_name,
     input_json,
     change_event_callbacks,
     json_factory,
-    set_mid_sdp_csp_mln_availability_for_aggregation,
-    set_mid_sdp_csp_admin_modes,
 ):
     """Test assign Resources command for mid"""
     return assign_resources(
@@ -154,12 +131,12 @@ def test_assign_res_command_mid(
         (CENTRALNODE_LOW, "assign_resource_low_without_sdp_4_2"),
     ],
 )
+@pytest.mark.usefixtures(
+    "set_low_devices_availability_for_aggregation",
+    "set_low_sdp_csp_mccs_admin_modes",
+)
 def test_assign_res_command_low(
-    central_node_name,
-    input_json,
-    change_event_callbacks,
-    json_factory,
-    set_low_devices_availability_for_aggregation,
+    central_node_name, input_json, change_event_callbacks, json_factory
 ):
     """Test assign Resources command for low"""
     return assign_resources(
@@ -189,39 +166,17 @@ def test_assign_res_command_low_with_auto_recovery(
 
 
 def assign_resources_with_invalid_json(
-    central_node_name,
-    assign_input_str,
-    change_event_callbacks,
-    subarray_device,
+    central_node_name, assign_input_str, change_event_callbacks
 ):
     """Test assign resources with invalid json."""
-    dev_factory = DevFactory()
-    central_node = dev_factory.get_device(central_node_name)
-    subarray_proxy = dev_factory.get_device(subarray_device)
+    central_node, _, _ = get_cn_sn(central_node_name)
 
-    ensure_checked_devices(central_node)
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-    result, unique_id = central_node.TelescopeOn()
-    logger.info(
-        "TelescopeOn Command ID: %s Returned result: %s",
-        unique_id,
-        str(result),
-    )
-
-    assert unique_id[0].endswith("TelescopeOn")
-    assert result[0] == ResultCode.QUEUED
-
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=4,
-    )
-
-    subarray_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node, subarray_device, True)
+    telescope_on(central_node, change_event_callbacks)
 
     result, message = central_node.AssignResources(assign_input_str)
 
@@ -232,7 +187,7 @@ def assign_resources_with_invalid_json(
     assert result[0] == ResultCode.REJECTED
 
     # Teardown
-    result, unique_id = central_node.TelescopeOff()
+    telescope_off(central_node, change_event_callbacks)
 
 
 @pytest.mark.post_deployment
@@ -241,18 +196,17 @@ def assign_resources_with_invalid_json(
     "central_node_name",
     [CENTRALNODE_LOW],
 )
+@pytest.mark.usefixtures("set_low_devices_availability_for_aggregation")
 def test_assign_res_command_low_invalid_json(
     central_node_name,
     change_event_callbacks,
     json_factory,
-    set_low_devices_availability_for_aggregation,
 ):
     """Test assign resources for low invalid json"""
     return assign_resources_with_invalid_json(
         central_node_name,
         json_factory("invalid_key_AssignResources"),
         change_event_callbacks,
-        LOW_SUBARRAY_DEVICE,
     )
 
 
@@ -262,40 +216,20 @@ def assign_resources_without_subarray_id(
     change_event_callbacks,
 ):
     """Test Assign Resources without subarray id"""
-    dev_factory = DevFactory()
-    central_node = dev_factory.get_device(central_node_name)
-    subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
-
-    ensure_checked_devices(central_node)
+    central_node, _, _ = get_cn_sn(central_node_name)
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-    result, unique_id = central_node.TelescopeOn()
-    logger.info(
-        "TelescopeOn Command ID: %s Returned result: %s",
-        unique_id,
-        str(result),
-    )
-
-    assert unique_id[0].endswith("TelescopeOn")
-    assert result[0] == ResultCode.QUEUED
-
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=4,
-    )
-
-    subarray_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
+    telescope_on(central_node, change_event_callbacks)
 
     result, message = central_node.AssignResources(assign_input_str)
 
     logger.info(
         "AssignResources Command ID: %s Returned result: %s",
-        unique_id,
         result,
+        message,
     )
 
     assert (
@@ -304,20 +238,7 @@ def assign_resources_without_subarray_id(
     )
     assert result[0] == ResultCode.REJECTED
 
-    result, unique_id = central_node.TelescopeOff()
-    logger.info(
-        "AssignResources Command ID: %s Returned result: %s",
-        unique_id,
-        str(result),
-    )
-
-    assert unique_id[0].endswith("TelescopeOff")
-    assert result[0] == ResultCode.QUEUED
-
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=4,
-    )
+    telescope_off(central_node, change_event_callbacks)
 
 
 @pytest.mark.post_deployment
@@ -326,12 +247,12 @@ def assign_resources_without_subarray_id(
     "central_node_name",
     [CENTRALNODE_MID],
 )
+@pytest.mark.usefixtures(
+    "set_mid_sdp_csp_mln_availability_for_aggregation",
+    "set_mid_sdp_csp_admin_modes",
+)
 def test_assign_res_command_mid_without_subarray_id(
-    central_node_name,
-    change_event_callbacks,
-    json_factory,
-    set_mid_sdp_csp_mln_availability_for_aggregation,
-    set_mid_sdp_csp_admin_modes,
+    central_node_name, change_event_callbacks, json_factory
 ):
     """Test assign Resources command mid without subarray id"""
     return assign_resources_without_subarray_id(
@@ -343,41 +264,22 @@ def test_assign_res_command_mid_without_subarray_id(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
+@pytest.mark.usefixtures("set_mid_sdp_csp_mln_availability_for_aggregation")
 def test_assign_resources_exception_propagation(
     change_event_callbacks,
     json_factory,
-    set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     """Test Assign Resources exception propagation"""
+    central_node, subarray_proxy, _ = get_cn_sn(CENTRALNODE_MID)
 
-    dev_factory = DevFactory()
-    central_node = dev_factory.get_device(CENTRALNODE_MID)
-    subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
-
-    ensure_checked_devices(central_node)
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
 
-    result, unique_id = central_node.TelescopeOn()
-    logger.info(
-        "AssignResources Command ID: %s Returned result: %s",
-        unique_id,
-        str(result),
-    )
+    telescope_on(central_node, change_event_callbacks)
 
-    assert unique_id[0].endswith("TelescopeOn")
-    assert result[0] == ResultCode.QUEUED
-
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=4,
-    )
-
-    subarray_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
     subarray_proxy.SetDefective(ERROR_PROPAGATION_DEFECT)
 
     result, unique_id = central_node.AssignResources(
@@ -404,51 +306,29 @@ def test_assign_resources_exception_propagation(
     )
     assert exception_message in event_data["attribute_value"][1]
 
-    subarray_proxy.SetDefective(RESET_DEFECT)
     # Teardown
-    result, unique_id = central_node.TelescopeOff()
-    subarray_proxy.ClearCommandCallInfo()
+    clean_up_subarray(subarray_proxy)
+    telescope_off(central_node, change_event_callbacks)
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
+@pytest.mark.usefixtures("set_mid_sdp_csp_mln_availability_for_aggregation")
 def test_assign_resources_mid_timeout(
     change_event_callbacks,
     json_factory,
-    set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     """Test Assign Resources mid timeout"""
 
-    dev_factory = DevFactory()
-    central_node = dev_factory.get_device(CENTRALNODE_MID)
-    subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
-
-    ensure_checked_devices(central_node)
+    central_node, subarray_proxy, _ = get_cn_sn(CENTRALNODE_MID)
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-    result, unique_id = central_node.TelescopeOn()
-    logger.info(
-        "AssignResources Command ID: %s Returned result: %s",
-        unique_id,
-        str(result),
-    )
+    telescope_on(central_node, change_event_callbacks)
 
-    assert unique_id[0].endswith("TelescopeOn")
-    assert result[0] == ResultCode.QUEUED
-
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=4,
-    )
-
-    tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
-    tmc_subarray.SetDefective(TIMEOUT_DEFECT)
-
-    subarray_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
+    subarray_proxy.SetDefective(TIMEOUT_DEFECT)
 
     result, unique_id = central_node.AssignResources(
         json_factory("command_AssignResources")
@@ -463,68 +343,29 @@ def test_assign_resources_mid_timeout(
     assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
 
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (
-            unique_id[0],
-            json.dumps(
-                (
-                    int(ResultCode.FAILED),
-                    "Timeout has occurred, command failed",
-                )
-            ),
-        ),
-        lookahead=4,
-    )
-    tmc_subarray.SetDefective(RESET_DEFECT)
-    tmc_subarray.SetDirectObsState(ObsState.EMPTY)
+    assert_exception(unique_id, TIMEOUT_MSG, change_event_callbacks)
 
     # Teardown
-    result, unique_id = central_node.TelescopeOff()
-    tmc_subarray.ClearCommandCallInfo()
+    clean_up_subarray(subarray_proxy)
+    telescope_off(central_node, change_event_callbacks)
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_assign_resources_low_timeout(
-    change_event_callbacks,
-    json_factory,
-    set_low_devices_availability_for_aggregation,
-):
+@pytest.mark.usefixtures("set_low_devices_availability_for_aggregation")
+def test_assign_resources_low_timeout(change_event_callbacks, json_factory):
     """Test Assign Resources low timeout"""
 
-    dev_factory = DevFactory()
-    central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
-    subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
+    central_node, subarray_proxy, _ = get_cn_sn(CENTRALNODE_LOW)
 
-    ensure_checked_devices(central_node)
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-    result, unique_id = central_node.TelescopeOn()
-    logger.info(
-        "Telescope On Command ID: %s Returned result: %s",
-        unique_id,
-        str(result),
-    )
+    telescope_on(central_node, change_event_callbacks)
 
-    assert unique_id[0].endswith("TelescopeOn")
-    assert result[0] == ResultCode.QUEUED
-
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (
-            unique_id[0],
-            json.dumps((int(ResultCode.OK), "Command Completed")),
-        ),
-        lookahead=4,
-    )
-
-    tmc_subarray = DevFactory().get_device(LOW_SUBARRAY_DEVICE)
-    tmc_subarray.SetDefective(TIMEOUT_DEFECT)
-
-    subarray_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
+    subarray_proxy.SetDefective(TIMEOUT_DEFECT)
 
     result, unique_id = central_node.AssignResources(
         json_factory("assign_resource_low")
@@ -539,61 +380,27 @@ def test_assign_resources_low_timeout(
     assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
 
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (
-            unique_id[0],
-            json.dumps(
-                (
-                    int(ResultCode.FAILED),
-                    "Timeout has occurred, command failed",
-                )
-            ),
-        ),
-        lookahead=4,
-    )
-    tmc_subarray.SetDefective(RESET_DEFECT)
-    tmc_subarray.SetDirectObsState(ObsState.EMPTY)
-
-    # Teardown
-    result, unique_id = central_node.TelescopeOff()
-    tmc_subarray.ClearCommandCallInfo()
+    assert_exception(unique_id, TIMEOUT_MSG, change_event_callbacks)
+    clean_up_subarray(subarray_proxy)
+    telescope_off(central_node, change_event_callbacks)
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
+@pytest.mark.usefixtures("set_low_devices_availability_for_aggregation")
 def test_assign_resources_low_error_aggregation(
-    change_event_callbacks,
-    json_factory,
-    set_low_devices_availability_for_aggregation,
+    change_event_callbacks, json_factory
 ):
     """Test Assign Resources low error aggregation"""
 
-    dev_factory = DevFactory()
-    central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
-    subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
+    central_node, subarray_proxy, _ = get_cn_sn(CENTRALNODE_LOW)
 
-    ensure_checked_devices(central_node)
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-    result, unique_id = central_node.TelescopeOn()
-    logger.info(
-        "TelescopeOn Command ID: %s Returned result: %s",
-        unique_id,
-        str(result),
-    )
-
-    assert unique_id[0].endswith("TelescopeOn")
-    assert result[0] == ResultCode.QUEUED
-
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=4,
-    )
-    subarray_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
+    telescope_on(central_node, change_event_callbacks)
 
     subarray_proxy.SetDefective(ERROR_PROPAGATION_DEFECT)
 
@@ -617,12 +424,11 @@ def test_assign_resources_low_error_aggregation(
         lookahead=8,
     )
     exception_message = (
-        f"{LOW_SUBARRAY_DEVICE}:" + " Exception occurred, command failed."
+        f"{LOW_SUBARRAY_DEVICE}: Exception occurred, command failed."
     )
 
     assert exception_message in event_data["attribute_value"][1]
-    subarray_proxy.SetDefective(RESET_DEFECT)
 
     # Teardown
-    result, unique_id = central_node.TelescopeOff()
-    subarray_proxy.ClearCommandCallInfo()
+    clean_up_subarray(subarray_proxy)
+    telescope_off(central_node, change_event_callbacks)

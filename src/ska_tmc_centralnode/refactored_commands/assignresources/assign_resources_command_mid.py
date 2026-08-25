@@ -2,7 +2,6 @@
 
 import logging
 
-from ska_control_model import ResultCode, TaskStatus
 from ska_tmc_common import AdapterFactory
 
 from ska_tmc_centralnode.refactored_commands.assignresources import (
@@ -57,7 +56,7 @@ class AssignResourcesMid(BaseAssignResourcesCN):
 
     def prepare_command(self) -> None:
         """Parse input and build the execution plan/context for MID."""
-        self.validate_subarray_id(self.subarray_id)
+        self.validate_subarray_id()
         request = AssignResourcesPreparation(
             self.command_runtime_context, self.logger
         ).prepare_request(self.context.argin, remove_transaction_id=True)
@@ -104,23 +103,3 @@ class AssignResourcesMid(BaseAssignResourcesCN):
         self.context.device_commands.append(
             self._build_subarray_device_command()
         )
-
-    def update_task_status(self, **kwargs) -> None:
-        """Update task status for AssignResourcesMid."""
-        result = kwargs.get("result")
-        status = kwargs.get("status", TaskStatus.COMPLETED)
-        exception = kwargs.get("exception", "")
-
-        if status == TaskStatus.ABORTED:
-            self.context.task_callback(
-                result=(ResultCode.ABORTED, "Command has been aborted"),
-                status=status,
-            )
-        elif result[0] == ResultCode.OK:
-            self.context.task_callback(result=result, status=status)
-        else:
-            self.context.task_callback(
-                result=(ResultCode.FAILED, result[1]),
-                status=status,
-                exception=exception,
-            )

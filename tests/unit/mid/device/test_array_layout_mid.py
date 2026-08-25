@@ -108,7 +108,9 @@ def test_array_layout_assign_resources(
     cm.dish_vcc_validation_status = MagicMock(
         return_value=DISH_VCC_VALIDATION_RESULT_STATUS
     )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.update_k_value_validation(
+        DISH_LEAF_NODE_DEVICE, ResultCode.OK
+    )
     result = cm.is_command_allowed("AssignResources")
     logger.info(f"Command allowed result is: {result}")
 
@@ -198,7 +200,9 @@ def test_mid_assign_resources_fails_with_invalid_default_array_layout_json(
     cm.dish_vcc_validation_status = MagicMock(
         return_value=DISH_VCC_VALIDATION_RESULT_STATUS
     )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.update_k_value_validation(
+        DISH_LEAF_NODE_DEVICE, ResultCode.OK
+    )
 
     # Patch the CM's getter so default_array_layout_url returns a non-dict.
     # This avoids the setter ValueError test and directly exercises the command path.

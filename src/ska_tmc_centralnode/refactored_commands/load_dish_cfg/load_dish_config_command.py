@@ -1,10 +1,12 @@
 """Commad class for Load_dish_config_command"""
 
 import json
-from typing import Tuple
+from logging import Logger
+from typing import Optional, Tuple
 
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
+from ska_tmc_common import AdapterFactory
 from ska_tmc_common.adapter_type import AdapterType
 from ska_tmc_common.v4.command_context import CommandResult, DeviceCommand
 from ska_tmc_common.v4.tmc_command import BaseTMCCommand
@@ -19,6 +21,7 @@ from ska_tmc_centralnode.utils.constants import (
 from .contexts import LoadDishCfgRuntimeContext
 from .dish_k_executor import DishKValueExecutor
 from .errors import DishAdapterError
+from .load_dish_cfg_plan import LoadDishCfgPlan
 from .load_dish_cfg_strategy import LoadDishCfgStrategy
 
 
@@ -34,20 +37,25 @@ class LoadDishCfg(BaseTMCCommand):
     def __init__(
         self,
         command_runtime_context: LoadDishCfgRuntimeContext,
-        adapter_factory,
-        logger,
-        timeout_subarrays: int = 60,
-        step_sleep: int = 1,
+        adapter_factory: AdapterFactory,
+        logger: Logger,
     ):
+        """Initialization of LoadDishCfg.
+
+        :param command_runtime_context: Instance of LoadDishCfgRuntimeContext.
+        :type command_runtime_context: LoadDishCfgRuntimeContext
+        :param adapter_factory: Instance of AdapterFactory.
+        :type adapter_factory: AdapterFactory
+        :param logger: Instance of Logger.
+        :type logger: Logger
+        """
         super().__init__(command_runtime_context, adapter_factory, logger)
-        self._timeout_subarrays = timeout_subarrays
-        self._step_sleep = step_sleep
         self.dish_cfg_params: str = ""
         self.dish_vcc_config_json: dict = {}
         self.stragegy = LoadDishCfgStrategy(
             command_runtime_context, logger, self.context.command_id
         )
-        self.plan = None
+        self.plan: Optional[LoadDishCfgPlan] = None
         # This is required to keep track of the
         # dish adapters for invoking SetKValue command
         self.adapter_factory = adapter_factory
@@ -76,7 +84,7 @@ class LoadDishCfg(BaseTMCCommand):
                 device_name=runtime.device_ctx.csp_mln_device_name,
                 adapter_type=AdapterType.CSP_MASTER_LEAF_NODE,
                 command_name="LoadDishCfg",
-                command_input=self.plan.dish_cfg_params,
+                command_input=self.plan.dish_cfg_params if self.plan else "",
             )
         ]
 
@@ -108,6 +116,7 @@ class LoadDishCfg(BaseTMCCommand):
         )
         dish_kvalue_executor.execute(self.plan.dish_parameters)
 
+    # pylint: disable=arguments-differ
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
     ) -> None:
@@ -129,19 +138,25 @@ class LoadDishCfg(BaseTMCCommand):
             str(result[0]),
             exception,
         )
-        result = self.process_loaddishcfg_as_per_err_message_or_exception(
+        (
+            result_code,
+            message,
+            is_csp_failed,
+        ) = self.process_loaddishcfg_as_per_err_message_or_exception(
             result=result,
             k_val_results=k_val_results,
             exception=exception,
         )
         self.logger.info("Result is %s", result)
-        if result[0] == ResultCode.FAILED or result[2]:
-            error_message = result[1] + " LoadDishCfg command failed: "
+        if result_code == ResultCode.FAILED or is_csp_failed:
+            error_message = message + " LoadDishCfg command failed: "
             runtime_context.command_ctx.update_dish_vcc_flag(False)
             self.process_update_task_for_loaddishcfg_failure(error_message)
         else:
             self.process_loaddishcfg_as_per_k_val_results(k_val_results)
             self.update_memorized_attribute()
+
+    # pylint: enable=arguments-differ
 
     def post_process(
         self,
@@ -272,7 +287,6 @@ class LoadDishCfg(BaseTMCCommand):
         """
         failed_count = 0
         is_cmd_failed_on_csp = False
-        # cm = self.component_manager
         for device, result in self.context.results.items():
             dev_id = device.split("/")[2].lower()
             if result.result_code not in [
@@ -402,9 +416,10 @@ class LoadDishCfg(BaseTMCCommand):
         restart
         """
         runtime_ctx = self.command_runtime_context
-        runtime_ctx.command_ctx.update_memorized_attribute(
-            self.plan.dish_cfg_params
-        )
+        if self.plan:
+            runtime_ctx.command_ctx.update_memorized_attribute(
+                self.plan.dish_cfg_params
+            )
 
     def get_dish_adapters(self) -> list:
         """
@@ -414,20 +429,20 @@ class LoadDishCfg(BaseTMCCommand):
             list: List of dish adapters.
         """
         dish_adapters = []
-        num_working = 0
         error_dev_names = []
         for (
             dev_name
         ) in self.command_runtime_context.device_ctx.dish_leaf_node_dev_names:
-            devInfo = self.command_runtime_context.device_ctx.get_dev(dev_name)
-            if not devInfo.unresponsive:
+            dev_info = self.command_runtime_context.device_ctx.get_dev(
+                dev_name
+            )
+            if not dev_info.unresponsive:
                 try:
                     dish_adapters.append(
                         self.adapter_factory.get_or_create_adapter(
                             dev_name, AdapterType.DISH
                         )
                     )
-                    num_working += 1
                     self.logger.debug(
                         "Adapter is created for DishLeafNode: %s", dev_name
                     )
@@ -438,7 +453,7 @@ class LoadDishCfg(BaseTMCCommand):
                         str(e),
                     )
                     error_dev_names.append(dev_name)
-        if num_working == 0:
+        if not dish_adapters:
             raise DishAdapterError(
                 f"Error in creating dish adapters {'.'.join(error_dev_names)}"
             )

@@ -7,8 +7,9 @@ role for SubarrayNode commands.
 
 import logging
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Tuple, cast
 
+from ska_control_model import ResultCode, TaskStatus
 from ska_tmc_common import AdapterFactory
 from ska_tmc_common.v4.command_context import CommandRuntimeContext
 from ska_tmc_common.v4.tmc_command import BaseTMCCommand
@@ -39,7 +40,7 @@ class BaseCNCommand(BaseTMCCommand):
         :type logger: logging.Logger
         """
         super().__init__(command_runtime_context, adapter_provider, logger)
-        self.subarray_id: int | None = None
+        self.subarray_id: int = 0
 
     def _build_command_runtime_context(self) -> CommandRuntimeContext:
         """Build (or fetch) the runtime context for this command.
@@ -125,14 +126,34 @@ class BaseCNCommand(BaseTMCCommand):
         )
         return subarray_adapter_dev_name
 
-    def validate_subarray_id(self, subarray_id: int) -> None:
+    def validate_subarray_id(self) -> None:
         """Validate the subarray id.
 
         :raises ValueError: if the subarray id is not valid.
         """
         name = self.command_runtime_context.input_parameter.subarray_dev_names
-        subarray_name = self.get_subarray_name(int(self.subarray_id))
+        subarray_name = self.get_subarray_name(self.subarray_id)
         if subarray_name not in name:
             raise ValueError(
                 f"Subarray Id {self.subarray_id} is not existing!"
+            )
+
+    def update_task_status(self, **kwargs) -> None:
+        """Update task status and clear per-command subsystem bookkeeping."""
+        result = cast(Tuple[ResultCode, str], kwargs.get("result"))
+        status = kwargs.get("status", TaskStatus.COMPLETED)
+        exception = kwargs.get("exception", "")
+
+        if status == TaskStatus.ABORTED:
+            self.context.task_callback(
+                result=(ResultCode.ABORTED, "Command has been aborted"),
+                status=status,
+            )
+        elif result[0] == ResultCode.OK:
+            self.context.task_callback(result=result, status=status)
+        else:
+            self.context.task_callback(
+                result=(ResultCode.FAILED, result[1]),
+                status=status,
+                exception=exception,
             )

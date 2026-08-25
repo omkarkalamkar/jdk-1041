@@ -1,6 +1,10 @@
 ska\_tmc\_centralnode.utils package
 ===================================
 
+.. contents:: Table of Contents
+   :depth: 4
+   :local:
+
 Submodules
 ----------
 
@@ -20,6 +24,13 @@ ska\_tmc\_centralnode.utils.constants module
    :undoc-members:
    :show-inheritance:
 
+ska\_tmc\_centralnode.utils.exception_decorator module
+------------------------------------------------------
+
+.. automodule:: ska_tmc_centralnode.utils.exception_decorator
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------

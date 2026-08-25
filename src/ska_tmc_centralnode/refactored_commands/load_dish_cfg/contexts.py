@@ -6,6 +6,8 @@ from typing import Any, Callable
 
 from ska_tmc_common.v4.command_context import CommandRuntimeContext
 
+from ska_tmc_centralnode.model.enum import DishConfigStatus
+
 
 @dataclass(kw_only=True)
 class DishAggregationContext:
@@ -42,13 +44,13 @@ class LoadDishCfgCommandContext:
 
     set_load_dish_cfg_aggregated_result: Callable[[str], None]
 
-    set_dish_vcc_command_status: Callable[[str, str], None]
+    set_dish_vcc_command_status: Callable[[DishConfigStatus], None]
 
-    update_dish_vcc_flag: Callable[[str, bool], None]
+    update_dish_vcc_flag: Callable[[bool], None]
 
-    get_dish_vcc_validation_status: Callable[[str], bool]
+    get_dish_vcc_validation_status: Callable[[], str]
 
-    set_dish_vcc_validation_status: Callable[[str, bool], None]
+    set_dish_vcc_validation_status: Callable[[dict], None]
 
     update_memorized_attribute: Callable
 
@@ -63,7 +65,7 @@ class LoadDishCfgRuntimeContext(CommandRuntimeContext):
 
     device_ctx: DeviceContext
     command_ctx: LoadDishCfgCommandContext
-    append_dish_dev_names: Callable[[list[str]], None]
+    append_dish_dev_names: Callable[[str], None]
     update_kval_aggregator: Callable[[str, Any], None]
     dish_kvalue_validation_aggregator: Any
     k_value_valid_range_lower_limit: int

@@ -32,8 +32,8 @@ def central_node_device(request):
 
 def test_attributes(central_node_device):
     assert central_node_device.State() in [
-        tango._tango.DevState.UNKNOWN,
-        tango._tango.DevState.ON,
+        tango.DevState.UNKNOWN,
+        tango.DevState.ON,
     ]
     assert central_node_device.HealthState == HealthState.OK
     assert central_node_device.telescopeHealthstate == HealthState.UNKNOWN
@@ -44,10 +44,10 @@ def test_attributes(central_node_device):
     central_node_device.simulationMode = SimulationMode.FALSE
     assert central_node_device.testMode == SimulationMode.FALSE
     assert central_node_device.telescopeState == DevState.UNKNOWN
-    assert central_node_device.imaging == ModesAvailability.not_available
-    assert central_node_device.pss == ModesAvailability.not_available
-    assert central_node_device.pst == ModesAvailability.not_available
-    assert central_node_device.vlbi == ModesAvailability.not_available
+    assert central_node_device.imaging == ModesAvailability.NOT_AVAILABLE
+    assert central_node_device.pss == ModesAvailability.NOT_AVAILABLE
+    assert central_node_device.pst == ModesAvailability.NOT_AVAILABLE
+    assert central_node_device.vlbi == ModesAvailability.NOT_AVAILABLE
     central_node_device.controlMode = ControlMode.REMOTE
     assert central_node_device.controlMode == ControlMode.REMOTE
     assert central_node_device.desiredTelescopeState == DevState.ON

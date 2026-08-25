@@ -47,7 +47,7 @@ class ReleaseResourcesMid(BaseReleaseResourcesCN):
 
     def prepare_command(self) -> None:
         """Parse and validate input data, build the plan, for MID."""
-        self.validate_subarray_id(self.subarray_id)
+        self.validate_subarray_id()
         self.command_runtime_context.update_abort_evt(
             self.context.task_abort_event
         )
@@ -72,7 +72,7 @@ class ReleaseResourcesMid(BaseReleaseResourcesCN):
 
         self.logger.info(
             "Invoking ReleaseAllResources on subarray | device=%s",
-            self.get_subarray_name(int(self.subarray_id)),
+            self.get_subarray_name(self.subarray_id),
         )
         self.context.device_commands.append(
             self._build_subarray_device_command()
@@ -81,5 +81,5 @@ class ReleaseResourcesMid(BaseReleaseResourcesCN):
             "Command ID: %s | Release Resources "
             "completed successfully on: %s",
             self.context.command_id,
-            self.get_subarray_name(int(self.subarray_id)),
+            self.get_subarray_name(self.subarray_id),
         )

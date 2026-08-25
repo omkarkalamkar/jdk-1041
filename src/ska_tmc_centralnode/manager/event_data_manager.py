@@ -8,7 +8,7 @@ import logging
 import threading
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Callable, Dict, Union
+from typing import Callable, Dict, Optional, Union, cast
 
 from ska_ser_logging import configure_logging
 from ska_tango_base.control_model import AdminMode, HealthState
@@ -26,7 +26,7 @@ class HealthStateData:
     """
 
     health_state: HealthState
-    event_timestamp: datetime
+    event_timestamp: Optional[datetime]
     is_dish_leaf_node: bool = False
 
 
@@ -37,7 +37,7 @@ class AdminModeData:
     """
 
     admin_mode: AdminMode
-    event_timestamp: datetime
+    event_timestamp: Optional[datetime]
 
 
 @dataclass
@@ -104,7 +104,7 @@ class EventDataManager:
      attributes in EventDataStorage class
     """
 
-    def __init__(self, component_manager):
+    def __init__(self, component_manager) -> None:
         self.event_info = EventDataStorage()
         self.component_manager = component_manager
         self.logger = component_manager.logger
@@ -127,7 +127,7 @@ class EventDataManager:
 
     def compare_timevals(
         self, current_timestamp: datetime, received_timestamp: datetime
-    ):
+    ) -> bool:
         """
         A method to compare the timestamps of events received with the
          existing timestamp.
@@ -145,7 +145,7 @@ class EventDataManager:
             return True
         return False
 
-    def update_aggragation_queue(self):
+    def update_aggragation_queue(self) -> None:
         """
         A method to put a copy of the EventDataStorage object whenever
          it receives an event.
@@ -226,7 +226,7 @@ class EventDataManager:
         device: str,
         data: Union[HealthState, AdminMode],
         data_type: str,
-        received_timestamp: datetime = None,
+        received_timestamp: Optional[datetime] = None,
     ):
         """
         A method to receive and update device name, data, and timestamp in the
@@ -234,7 +234,7 @@ class EventDataManager:
         """
         device_name = device.lower()
         with self.eventlock:
-            dict_name = self.attribute_mapping.get(data_type)
+            dict_name: str = self.attribute_mapping.get(data_type, "")
             target_dict = getattr(self.event_info, dict_name)
 
             if data_type == "HealthState":
@@ -249,7 +249,7 @@ class EventDataManager:
                     is_dish_leaf_node = dln_prefix in device_name
 
                 target_dict[device_name] = HealthStateData(
-                    health_state=data,
+                    health_state=cast(HealthState, data),
                     is_dish_leaf_node=is_dish_leaf_node,
                     event_timestamp=received_timestamp,
                 )
@@ -258,6 +258,7 @@ class EventDataManager:
             elif data_type == "AdminMode":
                 data = self.get_enum_name_from_value(AdminMode, int(data))
                 target_dict[device_name] = AdminModeData(
-                    admin_mode=data, event_timestamp=received_timestamp
+                    admin_mode=cast(AdminMode, data),
+                    event_timestamp=received_timestamp,
                 )
                 self.logger.debug("AdminMode - %s", target_dict[device_name])

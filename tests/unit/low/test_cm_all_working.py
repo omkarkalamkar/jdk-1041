@@ -55,10 +55,10 @@ def test_all_working(tango_context):
 
     elapsed_time = time.time() - start_time
     logger.info("checked %s devices in %s", num_faulty, elapsed_time)
-    for devInfo in cm.devices:
-        assert not devInfo.unresponsive
+    for dev_info in cm.devices:
+        assert not dev_info.unresponsive
         if all(
-            dev_name.lower() in devInfo.dev_name.lower()
+            dev_name.lower() in dev_info.dev_name.lower()
             for dev_name in cm.input_parameter.subarray_dev_names
-        ) and isinstance(devInfo, SubArrayDeviceInfo):
-            assert isinstance(devInfo, SubArrayDeviceInfo)
+        ) and isinstance(dev_info, SubArrayDeviceInfo):
+            assert isinstance(dev_info, SubArrayDeviceInfo)

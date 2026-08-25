@@ -2,7 +2,6 @@
 
 import logging
 
-from ska_control_model import ResultCode, TaskStatus
 from ska_tmc_common import AdapterFactory
 from ska_tmc_common.adapters import AdapterType
 from ska_tmc_common.v4.command_context import DeviceCommand
@@ -66,7 +65,7 @@ class AssignResourcesLow(BaseAssignResourcesCN):
 
     def prepare_command(self) -> None:
         """Parse input and build the execution plan/context for LOW."""
-        self.validate_subarray_id(self.subarray_id)
+        self.validate_subarray_id()
         request = AssignResourcesPreparation(
             self.command_runtime_context, self.logger
         ).prepare_request(self.context.argin)
@@ -137,23 +136,3 @@ class AssignResourcesLow(BaseAssignResourcesCN):
             ]
             and not self.is_auto_recovery_enabled
         )
-
-    def update_task_status(self, **kwargs) -> None:
-        """Update task status and clear per-command subsystem bookkeeping."""
-        result = kwargs.get("result")
-        status = kwargs.get("status", TaskStatus.COMPLETED)
-        exception = kwargs.get("exception", "")
-
-        if status == TaskStatus.ABORTED:
-            self.context.task_callback(
-                result=(ResultCode.ABORTED, "Command has been aborted"),
-                status=status,
-            )
-        elif result[0] == ResultCode.OK:
-            self.context.task_callback(result=result, status=status)
-        else:
-            self.context.task_callback(
-                result=(ResultCode.FAILED, result[1]),
-                status=status,
-                exception=exception,
-            )

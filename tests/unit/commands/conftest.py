@@ -127,6 +127,11 @@ def devices_to_load():
     )
 
 
+def _get_mock_dishln_name(instance: str) -> str:
+    """Provides the dish ln name based on instance name."""
+    return "mid-dish/dish-leaf-node/" + instance
+
+
 @pytest.fixture
 def device_context():
     """Create DeviceContext for LoadDishCfg tests."""
@@ -136,8 +141,8 @@ def device_context():
     context.csp_mln_device_name = "mid-csp/master-leaf-node/0001"
 
     context.dish_leaf_node_dev_names = [
-        "mid-dish/dish-leaf-node/001",
-        "mid-dish/dish-leaf-node/002",
+        _get_mock_dishln_name("001"),
+        _get_mock_dishln_name("002"),
     ]
 
     context.get_dev = MagicMock()
@@ -208,7 +213,7 @@ def dish_adapter():
 
     adapter = MagicMock()
 
-    adapter.dev_name = "mid-dish/dish-leaf-node/001"
+    adapter.dev_name = _get_mock_dishln_name("001")
 
     adapter.proxy = MagicMock()
 
@@ -220,9 +225,9 @@ def dish_adapters():
     """Create multiple mocked dish adapters."""
 
     adapter_1 = MagicMock()
-    adapter_1.dev_name = "mid-dish/dish-leaf-node/001"
+    adapter_1.dev_name = _get_mock_dishln_name("001")
 
     adapter_2 = MagicMock()
-    adapter_2.dev_name = "mid-dish/dish-leaf-node/002"
+    adapter_2.dev_name = _get_mock_dishln_name("002")
 
     return [adapter_1, adapter_2]

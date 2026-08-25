@@ -9,15 +9,16 @@ from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_MID,
 )
 from tests.integration.conftest import ensure_checked_devices
+from tests.settings import set_low_devices_availability
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_array_layout_file_provided_updates(
-    change_event_callbacks,
-    set_mid_sdp_csp_mln_availability_for_aggregation,
-    set_default_array_layout_url_attribute,
-):
+@pytest.mark.usefixtures(
+    "set_mid_sdp_csp_mln_availability_for_aggregation",
+    "set_default_array_layout_url_attribute",
+)
+def test_array_layout_file_provided_updates():
     """Test case to verify"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
@@ -41,12 +42,10 @@ def test_array_layout_file_provided_updates(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_on_command_low(
-    change_event_callbacks,
-    set_low_devices_availability_for_aggregation,
-    set_default_array_layout_url_attribute,
-):
+@pytest.mark.usefixtures("set_default_array_layout_url_attribute")
+def test_on_command_low():
     """Test cases for ON command for low"""
+    set_low_devices_availability()
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_LOW)
     assert central_node.HealthState == HealthState.OK
@@ -64,4 +63,5 @@ def test_on_command_low(
         + '"instrument/ska1_low/layout/low-layout.json"}'
     )
     central_node.DefaultArrayLayoutURL = url
+
     assert central_node.arrayLayoutFileProvided is True

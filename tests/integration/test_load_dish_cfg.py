@@ -23,6 +23,7 @@ from tests.settings import (
     MID_CSP_MASTER_DEVICE,
     MID_CSP_MLN_DEVICE,
     RESET_DEFECT,
+    assign_resources,
     check_lrcr_events,
     logger,
 )
@@ -798,11 +799,8 @@ def load_dish_cfg_partial_success_and_assign_rejected(
     sleep(2)
     vcc_status = json.loads(central_node.DishVccValidationStatus)
     assert "ALL DISH OK" in vcc_status.values()
-    result, unique_id = central_node.AssignResources(assign_input_str)
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=4,
-    )
+    assign_resources(central_node, assign_input_str, change_event_callbacks)
+
     result, unique_id = central_node.ReleaseResources(release_input_string)
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
@@ -871,11 +869,11 @@ def load_dish_cfg_partial_success_and_assign_rejected(
     "central_node_name",
     [CENTRALNODE_MID],
 )
+@pytest.mark.usefixtures("set_mid_sdp_csp_admin_modes")
 def test_load_dish_cfg_partial_success_and_assign_rejected(
     central_node_name,
     change_event_callbacks,
     json_factory,
-    set_mid_sdp_csp_admin_modes,
 ):
     """Test cases for Load_Dish_Config command"""
     return load_dish_cfg_partial_success_and_assign_rejected(

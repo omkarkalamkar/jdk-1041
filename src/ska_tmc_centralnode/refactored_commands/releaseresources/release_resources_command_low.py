@@ -55,7 +55,7 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
 
     def prepare_command(self) -> None:
         """Parse and normalize input data, build the plan, for LOW."""
-        self.validate_subarray_id(self.subarray_id)
+        self.validate_subarray_id()
         self.command_runtime_context.update_abort_evt(
             self.context.task_abort_event
         )
@@ -79,7 +79,7 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
         if self._plan.release_all:
             self.logger.info(
                 "Invoking ReleaseAllResources on subarray | device=%s",
-                self.get_subarray_name(int(self.subarray_id)),
+                self.get_subarray_name(self.subarray_id),
             )
             self.context.device_commands.append(
                 self._build_subarray_device_command()
@@ -100,7 +100,7 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
             "Command ID: %s | Release Resources "
             "completed successfully on: %s",
             self.context.command_id,
-            self.get_subarray_name(int(self.subarray_id)),
+            self.get_subarray_name(self.subarray_id),
         )
 
     def _build_mccs_device_command(self) -> DeviceCommand:

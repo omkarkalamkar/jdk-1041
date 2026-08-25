@@ -61,7 +61,7 @@ sys.path.insert(1, os.path.abspath("../.."))
 
 
 # -- Project information -----------------------------------------------------
-
+CENTRAL_NODE_DOCUMENTATION = "Central Node Documentation"
 project = "ska-tmc-centralnode"
 copyright = "2021, NCRA India"
 author = "NCRA India"
@@ -103,7 +103,6 @@ autodoc_typehints = "none"
 # You can specify multiple suffix as a list of string:
 #
 source_suffix = ['.rst', '.md']
-# source_suffix = ".rst"
 
 # The master toctree document.
 master_doc = "index"
@@ -183,7 +182,7 @@ latex_documents = [
     (
         master_doc,
         "CentralNode.tex",
-        "Central Node Documentation",
+        CENTRAL_NODE_DOCUMENTATION,
         "NCRA India",
         "manual",
     ),
@@ -195,7 +194,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "centralnode", "Central Node Documentation", [author], 1)
+    (master_doc, "centralnode", CENTRAL_NODE_DOCUMENTATION, [author], 1)
 ]
 
 
@@ -208,7 +207,7 @@ texinfo_documents = [
     (
         master_doc,
         "Centralnode",
-        "Central Node Documentation",
+        CENTRAL_NODE_DOCUMENTATION,
         author,
         "centralnode",
         "One line description of project.",

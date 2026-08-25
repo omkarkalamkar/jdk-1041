@@ -3,7 +3,9 @@ This module contain process for aggregation
 """
 
 import logging
-from multiprocessing import Event, Queue
+from multiprocessing.managers import ListProxy
+from multiprocessing.synchronize import Event
+from queue import Queue
 
 from ska_control_model import HealthState
 from ska_ser_logging import configure_logging
@@ -54,7 +56,7 @@ class HealthStateAggregationProcessor(AggregationProcess):
     def __init__(
         self,
         event_data_queue: Queue,
-        aggregated_health_state: list,
+        aggregated_health_state: ListProxy,
         aggregate_update_event: Event,
         telescope: str = "mid",
         callback=None,
@@ -71,24 +73,24 @@ class HealthStateAggregationProcessor(AggregationProcess):
         """Extract relevant fields from event data into a dictionary."""
         event_data_dict = {
             "all_unique_health_states": list(
-                set(
+                {
                     health_data.health_state
                     for health_data in event_data.health_state_data.values()
                     if not health_data.is_dish_leaf_node
-                )
+                }
             ),
             "all_unique_dish_leaf_node_health_states": list(
-                set(
+                {
                     healthdata.health_state
                     for healthdata in event_data.health_state_data.values()
                     if healthdata.is_dish_leaf_node
-                )
+                }
             ),
             "all_unique_admin_modes": list(
-                set(
+                {
                     admin_mode.admin_mode
                     for admin_mode in event_data.admin_mode_data.values()
-                )
+                }
             ),
         }
         return event_data_dict

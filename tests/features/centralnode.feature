@@ -18,7 +18,6 @@ Feature: Central Node acceptance
 		And subsystem controllers are in adminMode ONLINE
 		When I call the command <command_name>
 		Then the <command_name> command is executed successfully on lower level devices
-
 		Examples:
 		| command_name      |
 		| TelescopeOn       |

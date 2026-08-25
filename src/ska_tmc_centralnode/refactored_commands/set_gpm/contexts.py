@@ -6,9 +6,10 @@ import json
 import logging
 from dataclasses import dataclass
 from json import JSONDecodeError
-from threading import Lock
+from threading import Event, RLock
 from typing import Callable
 
+from ska_tmc_common import DeviceInfo
 from ska_tmc_common.v4.command_context import CommandRuntimeContext
 
 from ska_tmc_centralnode.refactored_commands.set_gpm.strategy import (
@@ -34,30 +35,26 @@ class GPMContext(CommandRuntimeContext):
     default_gpm_version_params: Default GPM version parameters.
     get_device: Callback to retrieve a device.
     dish_leaf_node_prefix: Prefix used for dish leaf node devices.
-    get_evt_data_manager: Callback to get the event data manager.
     dishln_gpm_lock: Lock protecting dish GPM data.
     global_pointing_model_status: GPM status for each dish.
     reset_gpm_data: Callback to reset GPM command data.
     """
 
     command_timeout: float
-    get_id: Callable
-    update_id: Callable
-    update_name: Callable
-    clear: Callable
-    get_name: Callable
-    gpm_unknown_dishes: list
+    update_name: Callable[[str], None]
+    clear: Callable[[], None]
+    get_name: Callable[[], str]
+    gpm_unknown_dishes: list[str]
     dishln_gpm_cmd_exe_data: dict
-    is_already_assigned: Callable
-    update_abort_evt: Callable
-    get_dish_leaf_node_device_names: Callable
+    is_already_assigned: Callable[[str], bool]
+    update_abort_evt: Callable[[Event], None]
+    get_dish_leaf_node_device_names: Callable[[], list]
     default_gpm_version_params: dict
-    get_device: Callable
+    get_device: Callable[[str], DeviceInfo]
     dish_leaf_node_prefix: str
-    get_evt_data_manager: Callable
-    dishln_gpm_lock: Lock
+    dishln_gpm_lock: RLock
     global_pointing_model_status: dict
-    reset_gpm_data: Callable
+    reset_gpm_data: Callable[[], None]
 
     def make_strategy(self, logger: logging.Logger) -> "GPMStrategy":
         """Create a global pointing model strategy.
@@ -87,7 +84,7 @@ class GPMRequest:
         self.data = data
 
     @classmethod
-    def from_json(cls, argin: str) -> "GPMRequest":
+    def from_json(cls, argin: str) -> dict:
         """Parse JSON input into a Global pointing model request."""
         try:
             return json.loads(argin)

@@ -4,7 +4,6 @@ Mirrors BaseAssignResources for SubarrayNode: AssignResources-specific
 behaviour shared between the Mid and Low telescope commands
 (completion criteria, shared device-command construction).
 """
-
 import logging
 
 from ska_control_model import ObsState
@@ -44,7 +43,7 @@ class BaseAssignResourcesCN(BaseCNCommand):
         :type logger: logging.Logger
         """
         super().__init__(command_runtime_context, adapter_provider, logger)
-        self.subarray_id: int | None = None
+        self.subarray_id: int = 0
         self._plan: LowAssignResourcesPlan | MidAssignResourcesPlan | None = (
             None
         )
@@ -55,7 +54,7 @@ class BaseAssignResourcesCN(BaseCNCommand):
         This method returns obsstate of subarray.
         """
         return self.command_runtime_context.obs_state_ctx.get(
-            self.get_subarray_name(int(self.subarray_id))
+            self.get_subarray_name(self.subarray_id)
         )
 
     def is_state_complete(self) -> bool:
@@ -73,7 +72,7 @@ class BaseAssignResourcesCN(BaseCNCommand):
         """
         command_input = self._plan.payload if self._plan else ""
         return DeviceCommand(
-            self.get_subarray_name(int(self.subarray_id)),
+            self.get_subarray_name(self.subarray_id),
             self.command_name,
             AdapterType.SUBARRAY,
             command_input,

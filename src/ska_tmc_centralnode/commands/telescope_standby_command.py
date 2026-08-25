@@ -1,13 +1,11 @@
 """Command class for TelescopeStandby command"""
 
-import logging
 import threading
-import time
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.control_model import ObsState
+from ska_tango_base.type_hints import TaskCallbackType
 from tango import DevState
 
 from ska_tmc_centralnode.commands.central_node_command import TelescopeOnOff
@@ -18,27 +16,9 @@ class TelescopeStandby(TelescopeOnOff):
     A class for CentralNode's TelescopeStandby() command.
     """
 
-    def __init__(
-        self,
-        component_manager,
-        adapter_factory=None,
-        timeout_subarrays=3,
-        step_sleep=0.1,
-        *args,
-        logger=None,
-        **kwargs,
-    ):
-        # pylint:disable=keyword-arg-before-vararg
-        super().__init__(
-            component_manager, adapter_factory, *args, logger=logger, **kwargs
-        )
-        self._timeout_subarrays = timeout_subarrays
-        self._step_sleep = step_sleep
-
     def telescope_standby(
         self,
-        logger: logging.Logger,
-        task_callback: Callable = None,
+        task_callback: TaskCallbackType,
         task_abort_event: Optional[threading.Event] = None,
     ) -> None:
         """
@@ -52,6 +32,8 @@ class TelescopeStandby(TelescopeOnOff):
             task_abort_event: Check for abort, defaults to None
 
         """
+        if task_abort_event:
+            self.task_abort_event = task_abort_event
         # Indicate that the task has started
         task_callback(status=TaskStatus.IN_PROGRESS)
         self.logger.info(
@@ -64,17 +46,7 @@ class TelescopeStandby(TelescopeOnOff):
             self.component_manager.command_id,
             result_code.name,
         )
-        if result_code == ResultCode.FAILED:
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=(ResultCode.FAILED, message),
-                exception=message,
-            )
-        else:
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=(ResultCode.OK, message),
-            )
+        self.update_callback(task_callback, result_code, message)
         return result_code, message
 
     def do_mid(self, argin=None) -> Tuple[ResultCode, str]:
@@ -118,58 +90,22 @@ class TelescopeStandby(TelescopeOnOff):
             "Waiting for all subarray devices to reach the EMPTY "
             "observation state."
         )
-        all_empty = False
-        start_time = time.time()
-        while not all_empty:
-            all_empty = True
-            for adapter in self.subarray_adapters:
-                obs_state = self.component_manager.get_device(
-                    adapter.dev_name
-                ).obs_state
-                if obs_state != ObsState.EMPTY:
-                    self.logger.debug(
-                        "Subarray current ObsState %s, while "
-                        "waiting for ObsState.EMPTY. ",
-                        str(obs_state),
-                    )
-                    all_empty = False
-            elapsed_time = time.time() - start_time
-            if elapsed_time > self._timeout_subarrays:
-                return (
-                    ResultCode.FAILED,
-                    "Timeout in waiting for subarrays devices to be empty",
-                )
-            time.sleep(self._step_sleep)
+        resultcode_msg = self.wait_for_subarray_empty()
+        if resultcode_msg[0] == ResultCode.FAILED:
+            return resultcode_msg
 
-        unavailable_devices = []
+        unavailable_devices: list = []
         for return_codes, message_or_unique_ids in [
             self.turn_off_dishes(),
             self.turn_standby_csp(),
             self.turn_standby_sdp(),
         ]:
-            for return_code, message_or_unique_id in zip(
-                return_codes, message_or_unique_ids
-            ):
-                # condition for exception raised during invoking command
-                if return_code in [ResultCode.FAILED]:
-                    return ResultCode.FAILED, message_or_unique_id
-                # condition for unavailable devices
-                if return_code in [ResultCode.REJECTED]:
-                    # return ResultCode.FAILED, message_or_unique_id
-                    unavailable_devices.append(
-                        message_or_unique_id.split(" ")[0]
-                    )
-
-        if unavailable_devices:
-            self.logger.info(
-                "Unavailable devices are %s ", unavailable_devices
+            resultcode_msg = self.process_resultcode_devices(
+                unavailable_devices, return_codes, message_or_unique_ids
             )
-            return (
-                ResultCode.OK,
-                f"Unavailable devices are {unavailable_devices}",
-            )
-
-        return (ResultCode.OK, "Command Completed")
+            if resultcode_msg[0] == ResultCode.FAILED:
+                return resultcode_msg
+        return self.return_result(unavailable_devices)
 
     def do_low(self, argin=None) -> Tuple[ResultCode, str]:
         """
@@ -206,62 +142,23 @@ class TelescopeStandby(TelescopeOnOff):
         ):
             if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
                 return ResultCode.FAILED, message_or_unique_id
-        self.logger.debug(
-            "Waiting for all subarray devices to reach the EMPTY "
-            "observation state."
-        )
-        all_empty = False
-        start_time = time.time()
-        while not all_empty:
-            all_empty = True
-            for adapter in self.subarray_adapters:
-                if (
-                    not self.component_manager.get_device(
-                        adapter.dev_name
-                    ).obs_state
-                    == ObsState.EMPTY
-                ):
-                    self.logger.debug(
-                        "Subarray %s still not empty", adapter.dev_name
-                    )
-                    all_empty = False
-            elapsed_time = time.time() - start_time
-            if elapsed_time > self._timeout_subarrays:
-                return (
-                    ResultCode.FAILED,
-                    "Timeout in waiting for subarrays devices to be empty",
-                )
-            time.sleep(self._step_sleep)
 
-        unavailable_devices = []
+        returncode_msg = self.wait_for_subarray_empty()
+        if returncode_msg[0] == ResultCode.FAILED:
+            return returncode_msg
+
+        unavailable_devices: list = []
         for return_codes, message_or_unique_ids in [
             self.turn_standby_mccs(),
             self.turn_standby_csp(),
             self.turn_standby_sdp(),
         ]:
-            for return_code, message_or_unique_id in zip(
-                return_codes, message_or_unique_ids
-            ):
-                # condition for exception raised during invoking command
-                if return_code in [ResultCode.FAILED]:
-                    return ResultCode.FAILED, message_or_unique_id
-                # condition for unavailable devices
-                if return_code in [ResultCode.REJECTED]:
-                    # return ResultCode.FAILED, message_or_unique_id
-                    unavailable_devices.append(
-                        message_or_unique_id.split(" ")[0]
-                    )
-
-        if unavailable_devices:
-            self.logger.info(
-                "Unavailable devices are %s ", unavailable_devices
+            return_code_msg = self.process_resultcode_devices(
+                unavailable_devices, return_codes, message_or_unique_ids
             )
-            return (
-                ResultCode.OK,
-                f"Unavailable devices are {unavailable_devices}",
-            )
-
-        return (ResultCode.OK, "Command Completed")
+            if return_code_msg[0] == ResultCode.FAILED:
+                return return_code_msg
+        return self.return_result(unavailable_devices)
 
     def turn_standby_subarrays(
         self,
@@ -393,5 +290,5 @@ class TelescopeStandby(TelescopeOnOff):
             "Off",
         )
 
-    def update_task_status(self):
+    def update_task_status(self, **kwargs):
         """blank method for resolving pylint errors"""

@@ -61,4 +61,4 @@ setup.cfg
 tests/requirements*
 .vscode
 .devcontainer
-
+.coverage*

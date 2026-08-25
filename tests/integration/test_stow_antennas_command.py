@@ -14,9 +14,7 @@ from tests.integration.conftest import ensure_checked_devices
 from tests.settings import DISH_DEFECT, RESET_DEFECT, logger
 
 
-def set_stow_mode_command(
-    tango_context, central_node_name, change_event_callbacks
-):
+def set_stow_mode_command(central_node_name, change_event_callbacks):
     """Test cases for SetStowMode command"""
 
     dev_factory = DevFactory()
@@ -159,13 +157,11 @@ def set_stow_mode_command(
     [CENTRALNODE_MID],
 )
 def test_set_stow_mode_command(
-    tango_context,
     central_node_name,
     change_event_callbacks,
 ):
     """Test cases Set Stow mode command"""
     return set_stow_mode_command(
-        tango_context,
         central_node_name,
         change_event_callbacks,
     )

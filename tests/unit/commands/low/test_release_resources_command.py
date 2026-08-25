@@ -9,7 +9,6 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
-from tango import DevState
 
 from ska_tmc_centralnode.model.input import InputParameterLow
 from ska_tmc_centralnode.utils.json_validator_decorator import (
@@ -158,7 +157,10 @@ def test_low_release_resources_fail_check_allowed(
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    cm.op_state_model._op_state = DevState.FAULT
+    cm.config.op_state_model.perform_action("init_invoked")
+    cm.config.op_state_model.perform_action("component_on")
+    cm.config.op_state_model.perform_action("component_fault")
+    cm.config.op_state_model.perform_action("init_completed")
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("ReleaseResources")
 
@@ -260,12 +262,9 @@ def test_low_release_resources_subarray_not_found(
         task_abort_event=threading.Event(),
     )
     task_callback.assert_against_call(
-        status=TaskStatus.IN_PROGRESS,
-    )
-    task_callback.assert_against_call(
-        status=TaskStatus.COMPLETED,
+        status=TaskStatus.REJECTED,
         result=(
-            ResultCode.FAILED,
-            "Subarray Id 99 is not existing!",
+            ResultCode.NOT_ALLOWED,
+            "Subarray devices not available: low-tmc/subarray/99",
         ),
     )

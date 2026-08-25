@@ -9,7 +9,6 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
-from tango import DevState
 
 from ska_tmc_centralnode.model.input import InputParameterLow
 from ska_tmc_centralnode.utils.json_validator_decorator import (
@@ -115,8 +114,6 @@ def test_low_assign_resources_command_fail_subarray(
 
     helper_adapter_factory = mock.Mock(**attrs)
 
-    # include exception in AssignResources command
-    attrs = {"AssignResources.side_effect": Exception}
     assign_input_str = json_factory("assign_resource_low")
     cm.adapter_factory = helper_adapter_factory
     cm.assign_resources(
@@ -241,7 +238,10 @@ def test_telescope_low_assign_resources_fail_check_allowed(
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), str(elapsed_time)
     )
-    cm.op_state_model._op_state = DevState.FAULT
+    cm.config.op_state_model.perform_action("init_invoked")
+    cm.config.op_state_model.perform_action("component_on")
+    cm.config.op_state_model.perform_action("component_fault")
+    cm.config.op_state_model.perform_action("init_completed")
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("AssignResources")
 
@@ -249,9 +249,12 @@ def test_telescope_low_assign_resources_fail_check_allowed(
 def check_if_subarray_is_available(cm):
     start_time = time.time()
     elapsed_time = 0
-    while (cm.component.telescope_availability)["tmc_subarrays"][
-        LOW_SUBARRAY_DEVICE
-    ] is not True:
+    while (
+        cm.component.telescope_availability["tmc_subarrays"][
+            LOW_SUBARRAY_DEVICE
+        ]
+        is not True
+    ):
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
@@ -326,7 +329,6 @@ def test_low_assign_resources_subarray_not_found(
 ):
     """Test assign resources when subarray adapter not found"""
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    # adapter_factory = HelperAdapterFactory()
 
     assign_input_str = json_factory("assign_resource_low")
     json_arg = json.loads(assign_input_str)
@@ -340,12 +342,9 @@ def test_low_assign_resources_subarray_not_found(
         task_abort_event=threading.Event(),
     )
     task_callback.assert_against_call(
-        status=TaskStatus.IN_PROGRESS,
-    )
-    task_callback.assert_against_call(
-        status=TaskStatus.COMPLETED,
+        status=TaskStatus.REJECTED,
         result=(
-            ResultCode.FAILED,
-            "Subarray Id 99 is not existing!",
+            ResultCode.NOT_ALLOWED,
+            "Subarray devices not available: low-tmc/subarray/99",
         ),
     )

@@ -46,9 +46,8 @@ def test_command_error(mock_invoke_lrc):
 
 
 def test_wait_for_completion():
-    cm = Mock(
-        command_timeout=5.0, command_completion_cond=threading.Condition()
-    )
+    cm = Mock(command_completion_cond=threading.Condition())
+    cm.config.timeout_config.command_timeout = 5.0
     cc = CentralNodeCommand(cm)
     cc.command_results["dummy_device"] = (ResultCode.FAILED, "error")
     result, message = cc.wait_for_command_completion(1)

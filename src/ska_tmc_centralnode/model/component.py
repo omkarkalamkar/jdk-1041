@@ -2,10 +2,12 @@
 
 import json
 import threading
+from collections import defaultdict
 from typing import List, Optional
 
 import tango
 from ska_control_model import HealthState
+from ska_tango_base.software_bus import SharingObserver, Signal
 from ska_tmc_common.device_info import DeviceInfo
 from ska_tmc_common.v2.tmc_component_manager import TmcComponent
 from tango import DevState
@@ -42,7 +44,7 @@ def dev_state_2_str(value: DevState) -> str:
     return dev_state_map.get(value, "DevState.UNKNOWN")
 
 
-class CentralComponent(TmcComponent):
+class CentralComponent(SharingObserver, TmcComponent):
     """
     A component class for Central Node
 
@@ -53,84 +55,38 @@ class CentralComponent(TmcComponent):
     * Monitoring its component
     """
 
+    _desired_telescope_state: Signal[tango.DevState] = Signal[tango.DevState](
+        stored=True, initial_value=tango.DevState.ON
+    )
+    _telescope_state: Signal[tango.DevState] = Signal[tango.DevState](
+        stored=True, initial_value=tango.DevState.UNKNOWN
+    )
+    _tmc_op_state: Signal[tango.DevState] = Signal[str](
+        stored=True, initial_value=tango.DevState.UNKNOWN
+    )
+    _telescope_availability: Signal[dict] = Signal[dict](
+        stored=True, initial_value={"tmc_subarrays": defaultdict(bool)}
+    )
+    _telescope_health_state: Signal[HealthState] = Signal[HealthState](
+        stored=True, initial_value=HealthState.UNKNOWN
+    )
+    _last_device_info_changed: Signal[str] = Signal[str](stored=True)
+    _imaging: Signal[ModesAvailability] = Signal[ModesAvailability](
+        stored=True, initial_value=ModesAvailability.NOT_AVAILABLE
+    )
+
     def __init__(self, logger):
         super().__init__(logger)
 
         self._devices = []
         self.logger = logger
-        self._telescope_state = DevState.UNKNOWN
-        self._tmc_op_state = DevState.UNKNOWN
-        self._telescope_health_state = HealthState.UNKNOWN
         # _health_state is never changing. Setter not implemented
         self._health_state = HealthState.OK
-        self._vlbi = ModesAvailability.not_available
-        self._imaging = ModesAvailability.not_available
-        self._pss = ModesAvailability.not_available
-        self._pst = ModesAvailability.not_available
-        self._update_device_callback = None
-        self._update_telescope_state_callback = None
-        self._update_telescope_health_state_callback = None
-        self._update_tmc_op_state_callback = None
-        self._telescope_availability_callback = None
-        self._update_imaging_callback = None
-        self._telescope_availability = {}
+        self._vlbi = ModesAvailability.NOT_AVAILABLE
+        self._pss = ModesAvailability.NOT_AVAILABLE
+        self._pst = ModesAvailability.NOT_AVAILABLE
         self.lock = threading.Lock()
-        self._desired_telescope_state = DevState.ON
-
-    def set_op_callbacks(
-        self,
-        _update_device_callback=None,
-        _update_telescope_state_callback=None,
-        _update_telescope_health_state_callback=None,
-        _update_tmc_op_state_callback=None,
-        _update_imaging_callback=None,
-        _telescope_availability_callback=None,
-    ):
-        """Sets Op state callback"""
-        self._update_device_callback = _update_device_callback
-        self._update_telescope_state_callback = (
-            _update_telescope_state_callback
-        )
-        self._update_telescope_health_state_callback = (
-            _update_telescope_health_state_callback
-        )
-        self._update_tmc_op_state_callback = _update_tmc_op_state_callback
-        self._update_imaging_callback = _update_imaging_callback
-        self._telescope_availability_callback = (
-            _telescope_availability_callback
-        )
-
-    def _invoke_device_callback(self, dev_info: DeviceInfo) -> None:
-        """invokes device callback"""
-        if self._update_device_callback is not None:
-            self._update_device_callback(dev_info)
-
-    def _invoke_telescope_state_callback(self) -> None:
-        """invokes telescope state callback"""
-        if self._update_telescope_state_callback is not None:
-            self._update_telescope_state_callback(self.telescope_state)
-
-    def _invoke_telescope_health_state_callback(self) -> None:
-        """invokes telescope health state callback"""
-        if self._update_telescope_health_state_callback is not None:
-            self._update_telescope_health_state_callback(
-                self.telescope_health_state
-            )
-
-    def _invoke_tmc_op_state_callback(self) -> None:
-        """Invokes tmc op_state callback"""
-        if self._update_tmc_op_state_callback is not None:
-            self._update_tmc_op_state_callback(self.tmc_op_state)
-
-    def _invoke_imaging_callback(self) -> None:
-        """Invokes imaging callback"""
-        if self._update_imaging_callback is not None:
-            self._update_imaging_callback(self.imaging)
-
-    def _invoke_telescope_availability_callback(self) -> None:
-        """Invokes telescope availablity callback"""
-        if self._telescope_availability_callback is not None:
-            self._telescope_availability_callback(self.telescope_availability)
+        self.rlock = threading._RLock()
 
     @property
     def desired_telescope_state(self) -> tango.DevState:
@@ -150,11 +106,11 @@ class CentralComponent(TmcComponent):
         :param value: desired telescope state
         :type value: DevState
         """
-        if not value == self._desired_telescope_state:
+        if value != self._desired_telescope_state:
             self._desired_telescope_state = value
 
     @property
-    def devices(self) -> List[DevState]:
+    def devices(self) -> List[DeviceInfo]:
         """
         Return the monitored devices.
 
@@ -198,7 +154,7 @@ class CentralComponent(TmcComponent):
         else:
             index = self._devices.index(dev_info)
             self._devices[index] = dev_info
-        self._invoke_device_callback(dev_info)
+        self.last_device_info_changed = dev_info
 
     def update_device_exception(
         self, device_info: DeviceInfo, exception: str
@@ -212,13 +168,28 @@ class CentralComponent(TmcComponent):
         if device_info not in self._devices:
             device_info.update_unresponsive(True, exception)
             self._devices.append(device_info)
-            self._invoke_device_callback(device_info)
+            self.last_device_info_changed = device_info
         else:
             index = self._devices.index(device_info)
             intdev_info = self._devices[index]
             intdev_info.state = DevState.UNKNOWN
             intdev_info.update_unresponsive(True, exception)
-            self._invoke_device_callback(intdev_info)
+            self.last_device_info_changed = device_info
+
+    @property
+    def last_device_info_changed(self) -> str:
+        """Provides last device information that has been changed."""
+        return self._last_device_info_changed
+
+    @last_device_info_changed.setter
+    def last_device_info_changed(self, dev_info: DeviceInfo) -> None:
+        """Updates the last device information changed attribute.
+
+        :param dev_info: Device Information.
+        :type dev_info: DeviceInfo
+        """
+        dev_info_str = dev_info.to_json()
+        self._last_device_info_changed = dev_info_str
 
     @property
     def telescope_state(self) -> tango.DevState:
@@ -228,7 +199,8 @@ class CentralComponent(TmcComponent):
         :return: the telescope state
         :rtype: DevState
         """
-        return self._telescope_state
+        with self.rlock:
+            return self._telescope_state
 
     @telescope_state.setter
     def telescope_state(self, value: tango.DevState) -> None:
@@ -238,9 +210,9 @@ class CentralComponent(TmcComponent):
         :param value: the new telescope state
         :type value: DevState
         """
-        if self._telescope_state != value:
-            self._telescope_state = value
-            self._invoke_telescope_state_callback()
+        with self.rlock:
+            if self._telescope_state != value:
+                self._telescope_state = value
 
     @property
     def telescope_availability(self) -> dict:
@@ -250,19 +222,20 @@ class CentralComponent(TmcComponent):
         :return: the telescope availability
         :rtype: DevVarStringArray
         """
-        return self._telescope_availability
+        with self.rlock:
+            return self._telescope_availability
 
     @telescope_availability.setter
-    def telescope_availability(self, value: tango.DevState) -> None:
+    def telescope_availability(self, value: dict) -> None:
         """
         Set telescope availability
 
         :param value: the new telescope availability
         :type value: DevState
         """
-        if self._telescope_availability != value:
-            self._telescope_availability = value
-            self._invoke_telescope_availability_callback()
+        with self.rlock:
+            if self._telescope_availability != value:
+                self._telescope_availability = value
 
     @property
     def telescope_health_state(self) -> HealthState:
@@ -272,7 +245,8 @@ class CentralComponent(TmcComponent):
         :return: the telescope health state
         :rtype: HealthState
         """
-        return self._telescope_health_state
+        with self.rlock:
+            return self._telescope_health_state
 
     @telescope_health_state.setter
     def telescope_health_state(self, value: HealthState) -> None:
@@ -282,9 +256,9 @@ class CentralComponent(TmcComponent):
         :param value: the new telescope health state
         :type value: HealthState
         """
-        if self._telescope_health_state != value:
-            self._telescope_health_state = value
-            self._invoke_telescope_health_state_callback()
+        with self.rlock:
+            if self._telescope_health_state != value:
+                self._telescope_health_state = value
 
     @property
     def tmc_op_state(self) -> tango.DevState:
@@ -294,7 +268,8 @@ class CentralComponent(TmcComponent):
         :return: the TMC operational State
         :rtype: DevState
         """
-        return self._tmc_op_state
+        with self.rlock:
+            return self._tmc_op_state
 
     @tmc_op_state.setter
     def tmc_op_state(self, value: tango.DevState) -> None:
@@ -304,9 +279,9 @@ class CentralComponent(TmcComponent):
         :param value: the TMC operational State
         :type value: DevState
         """
-        if self._tmc_op_state != value:
-            self._tmc_op_state = value
-            self._invoke_tmc_op_state_callback()
+        with self.rlock:
+            if self._tmc_op_state != value:
+                self._tmc_op_state = value
 
     @property
     def vlbi(self) -> ModesAvailability:
@@ -347,10 +322,8 @@ class CentralComponent(TmcComponent):
         :param value: vlbi ModesAvailability
         :type value: ModesAvailability
         """
-        if isinstance(value, ModesAvailability):
-            if self._imaging != value:
-                self._imaging = value
-                self._invoke_imaging_callback()
+        if isinstance(value, ModesAvailability) and self._imaging != value:
+            self._imaging = value
 
     @property
     def pss(self) -> ModesAvailability:

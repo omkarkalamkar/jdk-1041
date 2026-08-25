@@ -12,7 +12,7 @@ stages:
   - pages
   - scan
   - lifecycle
-
+  
 join_linting_reports:
   stage: join-reports
   script:
@@ -24,11 +24,9 @@ join_linting_reports:
     when: always
 
 include:
-  # # # Helm Chart linting and Publish
-  # Note: Commenting this part to Disable helm chart linting and Publish job from the pipeline
-  # - project: 'ska-telescope/templates-repository'
-  #   file: 'gitlab-ci/includes/helm-chart.gitlab-ci.yml'
-  # # Python packages build,lint, test and publish
+  - project: 'ska-telescope/templates-repository'
+    file: 'gitlab-ci/includes/sonar-scan.gitlab-ci.yml'
+
   - project: "ska-telescope/templates-repository"
     file: "gitlab-ci/includes/python.gitlab-ci.yml"
 
@@ -40,22 +38,18 @@ include:
   - project: "ska-telescope/templates-repository"
     file: "gitlab-ci/includes/docs.gitlab-ci.yml"
 
-  # # k8s steps
-  # - project: "ska-telescope/templates-repository"
-  #   file: "gitlab-ci/includes/k8s.gitlab-ci.yml"
+  # k8s steps
+  - project: "ska-telescope/templates-repository"
+    file: "gitlab-ci/includes/k8s.gitlab-ci.yml"
 
   # Release Automation
   - project: "ska-telescope/templates-repository"
     file: "gitlab-ci/includes/release.gitlab-ci.yml"
 
-  # Create Gitlab CI badges from CI metrics
-  # https://developer.skatelescope.org/en/latest/tools/continuousintegration.html#automated-collection-of-ci-health-metrics-as-part-of-the-ci-pipeline
   - project: "ska-telescope/templates-repository"
     file: "gitlab-ci/includes/finaliser.gitlab-ci.yml"
-  - project: "ska-telescope/templates-repository"
-    file: "gitlab-ci/includes/k8s-test-runner.gitlab-ci.yml"
 
-k8s-test-runner:
+k8s-test:
   variables:
     SERVICE_ACCOUNT: "ci-svc-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA"
   before_script:
@@ -63,8 +57,8 @@ k8s-test-runner:
     - make k8s-install-chart
     - make k8s-wait
   script:
-    - make k8s-test-runner TANGO_HOST="tango-databaseds.$KUBE_NAMESPACE.svc.techops.internal.skao.int:10000"
-    - make k8s-test-runner MARK=restart_device_server TANGO_HOST="tango-databaseds.$KUBE_NAMESPACE.svc.techops.internal.skao.int:10000"
+    - make k8s-test
+    - make k8s-test MARK=restart_device_server 
     - |
       if [[ "$CI_KEEP_NAMESPACE" != "true" ]]; then
         make k8s-uninstall-chart || true
@@ -75,7 +69,7 @@ k8s-test-runner:
 
 k8s-test-low:
   extends:
-    - k8s-test-runner
+    - k8s-test
   variables:
     PYTANGO_GREEN_MODE: "futures"
     TELESCOPE: "SKA-low"
@@ -88,8 +82,8 @@ k8s-test-low:
     - make k8s-install-chart
     - make k8s-wait
   script:
-    - make k8s-test-runner TANGO_HOST="tango-databaseds.$KUBE_NAMESPACE.svc.techops.internal.skao.int:10000"
-    - make k8s-test-runner MARK=auto_recovery TANGO_HOST="tango-databaseds.$KUBE_NAMESPACE.svc.techops.internal.skao.int:10000"
+    - make k8s-test
+    - make k8s-test MARK=auto_recovery 
     - |
       if [[ "$CI_KEEP_NAMESPACE" != "true" ]]; then
         make k8s-uninstall-chart || true
@@ -104,7 +98,7 @@ k8s-test-low:
 
 stop-k8s-test-low:
   extends:
-    - stop-k8s-test-runner
+    - stop-k8s-test
   variables:
     CONFIG: "low"
     KUBE_NAMESPACE: "ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG"
@@ -112,7 +106,3 @@ stop-k8s-test-low:
     - make k8s-uninstall-chart
     - kubectl -n $KUBE_NAMESPACE delete pods,svc,daemonsets,deployments,replicasets,statefulsets,cronjobs,jobs,ingresses,configmaps --all
     - make k8s-delete-namespace
-
-docs-build-rtd:
-  rules:
-    - when: never

@@ -63,7 +63,9 @@ def test_load_dish_cfg_command(
         "dln_kvalue_validation_results",
         {"ska001": "k-value identical"},
     ):
-        cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+        cm._event_cb_manager.update_k_value_validation(
+            DISH_LEAF_NODE_DEVICE, ResultCode.OK
+        )
         cm.load_dish_cfg(
             dish_cfg_input_str,
             task_callback=task_callback,
@@ -72,7 +74,6 @@ def test_load_dish_cfg_command(
         task_callback.assert_against_call(
             call_kwargs={"status": TaskStatus.IN_PROGRESS}
         )
-        cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
         task_callback.assert_against_call(
             call_kwargs={
                 "status": TaskStatus.COMPLETED,
@@ -203,18 +204,22 @@ def test_dish_vcc_validation_status(task_callback, json_factory):
 
     cm, _ = create_cm()
     cm.dish_vcc_command_status = DishConfigStatus.STAGING
-    cm.handle_dish_vcc_validation_result(MID_CSP_MLN_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.handle_dish_vcc_validation_result(
+        MID_CSP_MLN_DEVICE, ResultCode.OK
+    )
     assert cm.dish_vcc_command_status == DishConfigStatus.COMPLETED
     assert json.loads(cm.dish_vcc_validation_status) == {
         "mid-tmc/leaf-node-csp/0": "TMC and CSP Master Dish Vcc Version is Same"
     }
 
-    cm.handle_dish_vcc_validation_result(MID_CSP_MLN_DEVICE, ResultCode.FAILED)
+    cm._event_cb_manager.handle_dish_vcc_validation_result(
+        MID_CSP_MLN_DEVICE, ResultCode.FAILED
+    )
     assert json.loads(cm.dish_vcc_validation_status) == {
         "mid-tmc/leaf-node-csp/0": "TMC and CSP Master Dish VCC version is Different"
     }
 
-    cm.handle_dish_vcc_validation_result(
+    cm._event_cb_manager.handle_dish_vcc_validation_result(
         MID_CSP_MLN_DEVICE, ResultCode.NOT_ALLOWED
     )
     assert json.loads(cm.dish_vcc_validation_status) == {
@@ -223,18 +228,19 @@ def test_dish_vcc_validation_status(task_callback, json_factory):
     # Validate Dish Config status flag
     cm.check_if_csp_all_dish_ready = mock.Mock()
     cm.check_if_csp_all_dish_ready.return_value = True
-    cm.invoke_load_dish_cfg_command_callback = mock.Mock()
-    cm.handle_dish_vcc_validation_result(
+    cm.config.dish_config.invoke_command_callback = mock.Mock()
+    cm._event_cb_manager.check_if_csp_all_dish_ready = mock.Mock()
+
+    cm._event_cb_manager.handle_dish_vcc_validation_result(
         MID_CSP_MLN_DEVICE, ResultCode.UNKNOWN
     )
     assert cm.dish_vcc_command_status == DishConfigStatus.INIT
 
-    cm.check_if_csp_all_dish_ready.return_value = False
+    cm._event_cb_manager.check_if_csp_all_dish_ready.return_value = False
     cm.command_in_progress = ""
-    cm.handle_dish_vcc_validation_result(
+    cm._event_cb_manager.handle_dish_vcc_validation_result(
         MID_CSP_MLN_DEVICE, ResultCode.UNKNOWN
     )
-
     assert cm.dish_vcc_command_status == DishConfigStatus.FAILED
 
 
@@ -251,12 +257,6 @@ def test_load_dish_cnfg_command_fail_csp_master(
     load_dish_cnfg_command = LoadDishCfg(
         cm._get_load_dish_cfg_context(), adapter_factory, logger=logger
     )
-    # (
-    #     load_dish_cnfg_command.dish_vcc_config_json,
-    #     _,
-    # ) = load_dish_cnfg_command.check_and_validate_dish_vcc_data(
-    #     dish_cfg_input_str
-    # )
     (res_code, _) = load_dish_cnfg_command.execute(
         dish_cfg_input_str,
         task_callback=mock.Mock(),

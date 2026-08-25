@@ -5,33 +5,42 @@ import logging
 import os
 import threading
 import time
-from typing import List
+from unittest import mock
 
 import pytest
 import tango
 from ska_control_model import AdminMode
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
+from ska_tango_base.software_bus import _SignalBus
 from ska_tango_testing.mock.placeholders import Anything
 from ska_tango_testing.mock.tango.event_callback import (
     MockTangoEventCallbackGroup,
 )
-from ska_tmc_common import FaultType, LivelinessProbeType
+from ska_tmc_common import DishMode, FaultType, LivelinessProbeType
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
+from ska_tmc_centralnode.manager.component_manager_config import (
+    ArrayLayoutConfig,
+    DishVccConfig,
+    GPMConfig,
+    LowCentralNodeComponentManagerConfig,
+    MidCentralNodeComponentManagerConfig,
+    TimeoutConfig,
+)
 from ska_tmc_centralnode.manager.component_manager_low import (
     CNComponentManagerLow,
 )
 from ska_tmc_centralnode.manager.component_manager_mid import (
     CNComponentManagerMid,
 )
+from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
 )
-from tests.mock_callable import MockCallable
 
 logger = logging.getLogger(__name__)
 TANGO_HOST = os.getenv("TANGO_HOST")
@@ -87,6 +96,8 @@ DEVICE_LIST_MID = [
     DISH_MASTER_DEVICE_500,
     DISH_MASTER_DEVICE_999,
 ]
+COMMAND_COMPLETED = "Command Completed"
+TEST_TIMEOUT = "Timeout occurred while executing the test"
 DEVICE_LIST_LOW = [
     "low-tmc/leaf-node-mccs/0",
     "low-mccs/control/control",
@@ -142,6 +153,145 @@ DISH_VCC_VALIDATION_RESULT_STATUS = {
     "dish": "ALL DISH OK",
 }
 
+TIMEOUT_MSG = "Timeout has occurred, command failed"
+LOW_SUBARRAY_NOT_AVAILABLE = (
+    "Subarray devices not available: ['low-tmc/subarray/01']"
+)
+MID_SUBARRAY_NOT_AVAILABLE = (
+    "Subarray devices not available: ['mid-tmc/subarray/01']"
+)
+GPM_DEFAULT_DATA_SOURCE = (
+    "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators"
+)
+
+GPM_DEFAULT_FILEPATH = "instrument/ska_mid1/global_pointing_model_data"
+
+
+def telescope_on(
+    central_node: tango.DeviceProxy,
+    change_event_callbacks: MockTangoEventCallbackGroup,
+) -> None:
+    """Invokes telescope on"""
+    result, unique_id = central_node.TelescopeOn()
+    logger.info(
+        "Telescope On Command ID: %s Returned result: %s",
+        unique_id,
+        str(result),
+    )
+
+    assert unique_id[0].endswith("TelescopeOn")
+    assert result[0] == ResultCode.QUEUED
+
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (unique_id[0], json.dumps((int(ResultCode.OK), COMMAND_COMPLETED))),
+        lookahead=4,
+    )
+
+
+def telescope_off(
+    central_node: tango.DeviceProxy,
+    change_event_callbacks: MockTangoEventCallbackGroup,
+) -> None:
+    """Invokes telescope off"""
+
+    result, unique_id = central_node.TelescopeOff()
+    logger.info(
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        str(result),
+    )
+
+    assert unique_id[0].endswith("TelescopeOff")
+    assert result[0] == ResultCode.QUEUED
+
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (unique_id[0], json.dumps((int(ResultCode.OK), COMMAND_COMPLETED))),
+        lookahead=4,
+    )
+
+
+def clean_up_subarray(subarray: tango.DeviceProxy) -> None:
+    """Cleans the mock subarray."""
+    subarray.SetDefective(RESET_DEFECT)
+    subarray.SetDirectObsState(ObsState.EMPTY)
+    subarray.ClearCommandCallInfo()
+
+
+def assign_resources(
+    central_node: tango.DeviceProxy,
+    assign_input_str: str,
+    change_event_callbacks: MockTangoEventCallbackGroup,
+):
+    """Invoke assign reosurces command"""
+    _, unique_id_assign = central_node.AssignResources(assign_input_str)
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (
+            unique_id_assign[0],
+            json.dumps((int(ResultCode.OK), COMMAND_COMPLETED)),
+        ),
+        lookahead=6,
+    )
+
+
+def check_exception(
+    change_event_callbacks: MockTangoEventCallbackGroup,
+    unique_id: tuple,
+    device_name: str,
+    exception_msg: str,
+) -> None:
+    """Checks the exception present in LRCR attribute."""
+    event_data = change_event_callbacks[
+        "longRunningCommandResult"
+    ].assert_change_event(
+        (unique_id[0], Anything),
+        lookahead=4,
+    )
+
+    assert exception_msg in event_data["attribute_value"][1]
+    assert device_name in event_data["attribute_value"][1]
+
+
+def check_dish_mode_event(
+    dish_name: str,
+    dish_mode: DishMode,
+    change_event_callbacks: MockTangoEventCallbackGroup,
+):
+    """Checks the DishMode in the attribute event."""
+    dev_factory = DevFactory()
+    dish_leaf_node = dev_factory.get_device(dish_name)
+    evt_id = dish_leaf_node.subscribe_event(
+        "dishMode",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["dishMode"],
+    )
+
+    change_event_callbacks["dishMode"].assert_change_event(
+        dish_mode,
+        lookahead=2,
+    )
+    dish_leaf_node.unsubscribe_event(evt_id)
+
+
+def assert_exception(
+    unique_id: tuple,
+    exception_msg: str,
+    change_event_callbacks: MockTangoEventCallbackGroup,
+    result_code: ResultCode = ResultCode.FAILED,
+):
+    """Assert exceptions in LRCR attribute event."""
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (
+            unique_id[0],
+            json.dumps(
+                (
+                    int(result_code),
+                    exception_msg,
+                )
+            ),
+        ),
+        lookahead=4,
+    )
+
 
 def set_devices_unresponsive(cm, device_names: list):
     """Sets devices unresponsive
@@ -159,8 +309,8 @@ def set_devices_unresponsive(cm, device_names: list):
 def count_faulty_devices(cm):
     """Counts faulty devices"""
     result = 0
-    for devInfo in cm.checked_devices:
-        if devInfo.unresponsive:
+    for dev_info in cm.checked_devices:
+        if dev_info.unresponsive:
             result += 1
     return result
 
@@ -169,8 +319,6 @@ def set_ldcfg_aggr_result(cm):
     """Temporary method to set dish vcc validation status for testing"""
 
     def set_load_dish_aggr_result(cm):
-        cm.number_of_dish_vcc_event_processed = 0
-        cm.load_dish_cfg_aggregated_result = True
         with cm.command_completion_cond:
             cm.command_completion_cond.notify_all()
 
@@ -182,9 +330,9 @@ def dish_vcc_process_callback(event):
     logger.debug("Dish Vcc process callback called with event %s", str(event))
 
 
-def mock_update_device_callback(devInfo):
+def mock_update_device_callback(dev_info):
     """Dummy method for Update device callabacks"""
-    logger.debug("Update device callabacks devInfo: %s", devInfo)
+    logger.debug("Update device callabacks dev_info: %s", dev_info)
 
 
 def mock_update_telescope_state_callback(telescope_state):
@@ -227,134 +375,145 @@ def default_array_layout_url_callback(url_dict):
     logger.debug("Default array layout URL callback: %s", url_dict)
 
 
+def _get_cm_mid_config(
+    p_liveliness_probe=False,
+    p_event_manager=True,
+) -> MidCentralNodeComponentManagerConfig:
+    default_array_layout_url_mid = {
+        "source_uris": [
+            "gitlab://gitlab.com/ska-telescope/"
+            "ska-telmodel-data?main#tmdata"
+        ],
+        "array_layout_path": ("instrument/ska1_low/layout/low-layout.json"),
+    }
+    bus_manager = BusManager()
+    component = CentralComponent(logger)
+    component.shared_bus = bus_manager.get_bus()
+    config = MidCentralNodeComponentManagerConfig(
+        component=component,
+        op_state_model=TMCOpStateModel(logger),
+        input_parameter=InputParameterMid(None),
+        logger=logger,
+        dish_config=DishVccConfig(
+            uri="",
+            file_path="",
+            invoke_command_callback=mock.Mock(),
+            enable_init=False,
+        ),
+        gpm_config=GPMConfig(
+            version="1.0.0",
+            interface=(
+                "https://schema.skao.int/ska-mid-global-pointing-model/1.0"
+            ),
+            data_sources_prefix=(GPM_DEFAULT_DATA_SOURCE),
+            file_path_prefix=(GPM_DEFAULT_FILEPATH),
+            invoke_command_callback=invoke_set_gpm_command_callback,
+        ),
+        timeout_config=TimeoutConfig(),
+        array_layout_config=ArrayLayoutConfig(
+            default_url=default_array_layout_url_mid
+        ),
+        subarray_trl_prefix="mid-tmc/subarray/",
+        mkt_extension_id="",
+    )
+    if not p_liveliness_probe:
+        config.liveliness_probe_type = LivelinessProbeType.NONE
+    config.event_manager_enabled = p_event_manager
+    return config
+
+
+def _get_cm_low_config(
+    p_liveliness_probe=False,
+    p_event_manager=True,
+) -> LowCentralNodeComponentManagerConfig:
+    default_array_layout_url_low = {
+        "source_uris": [
+            "gitlab://gitlab.com/ska-telescope/"
+            "ska-telmodel-data?main#tmdata"
+        ],
+        "array_layout_path": ("instrument/ska1_low/layout/low-layout.json"),
+    }
+    bus_manager = BusManager()
+    component = CentralComponent(logger)
+    component.shared_bus = bus_manager.get_bus()
+    config = LowCentralNodeComponentManagerConfig(
+        component=component,
+        op_state_model=TMCOpStateModel(logger),
+        input_parameter=InputParameterLow(None),
+        logger=logger,
+        timeout_config=TimeoutConfig,
+        array_layout_config=ArrayLayoutConfig(
+            default_url=default_array_layout_url_low
+        ),
+        subarray_trl_prefix="low-tmc/subarray/",
+        is_auto_recovery_enabled=True,
+    )
+    if not p_liveliness_probe:
+        config.liveliness_probe_type = LivelinessProbeType.NONE
+    config.event_manager_enabled = p_event_manager
+    return config
+
+
+class BusManager:
+    """Class to manage signal bus."""
+
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self):
+        self.bus = _SignalBus()
+
+    def get_bus(self):
+        """Provides signal bus."""
+        return self.bus
+
+    # pylint:disable=protected-access
+    def start_bus(self):
+        """Starts the signal bus for testing."""
+        if self.bus._thread.is_alive():
+            self.bus.shutdown_thread()
+        self.bus.start_thread()
+
+    # pylint:enable=protected-access
+
+
 def create_cm(
     p_liveliness_probe=False,
     p_event_manager=True,
     _input_parameter=InputParameterMid(None),
 ):
     """Creates component manager instance"""
-    op_state_model = TMCOpStateModel(logger)
-
     # Creating component manager
+    bus_manager = BusManager()
+    bus_manager.start_bus()
     if isinstance(_input_parameter, InputParameterMid):
-        unique_id = f"{time.time()}"
-        task_callback = MockCallable(unique_id)
-
-        default_array_layout_url_mid = {
-            "source_uris": [
-                "gitlab://gitlab.com/ska-telescope/"
-                "ska-telmodel-data?main#tmdata"
-            ],
-            "array_layout_path": (
-                "instrument/ska1_low/layout/low-layout.json"
-            ),
-        }
-
         cm = CNComponentManagerMid(
-            op_state_model,
-            _input_parameter=InputParameterMid(None),
-            logger=logger,
-            _dish_vcc_command_status_callback=dish_vcc_process_callback,
-            _update_device_callback=mock_update_device_callback,
-            _update_telescope_state_callback=(
-                mock_update_telescope_state_callback
-            ),
-            _update_telescope_health_state_callback=(
-                mock_update_telescope_health_state_callback
-            ),
-            _update_tmc_op_state_callback=(mock_update_tmc_op_state_callback),
-            _update_imaging_callback=mock_update_imaging_callback,
-            _telescope_availability_callback=(
-                mock_telescope_availability_callback
-            ),
-            array_layout_url_callback=array_layout_url_callback,
-            default_array_layout_url_callback=(
-                default_array_layout_url_callback
-            ),
-            _update_dishvccconfig_callback=task_callback,
-            _dishvccvalidation_callback=task_callback,
-            _event_manager=p_event_manager,
-            _liveliness_probe=LivelinessProbeType.NONE,
-            enable_dish_vcc_init=False,
-            invoke_set_gpm_command_callback=invoke_set_gpm_command_callback,
-            gpm_version="1.0.0",
-            gpm_interface=(
-                "https://schema.skao.int/ska-mid-global-pointing-model/1.0"
-            ),
-            gpm_data_sources_prefix=(
-                "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators"
-            ),
-            gpm_file_path_prefix=(
-                "instrument/ska_mid1/global_pointing_model_data"
-            ),
-            default_array_layout_url=default_array_layout_url_mid,
+            config=_get_cm_mid_config(p_liveliness_probe, p_event_manager)
         )
         # In this unit test dish_vcc initialisation should not be run during
         # device
         # run because this unit test is explicitly calling load dish config
         # command.
-        DEVICE_LIST = DEVICE_LIST_MID
+        device_list = DEVICE_LIST_MID
+        cm.component.shared_bus = bus_manager.get_bus()
+        cm.shared_bus = bus_manager.get_bus()
         cm.is_dish_vcc_config_set = True
         cm.dish_vcc_command_status = DishConfigStatus.COMPLETED
-        cm.default_array_layout_url = {
-            "source_uris": list(
-                [
-                    "gitlab://gitlab.com/ska-telescope/"
-                    "ska-telmodel-data?main#tmdata"
-                ],
-            ),
-            "array_layout_path": "instrument/ska1_mid/layout/mid-layout.json",
-        }
     else:
-        default_array_layout_url_low = {
-            "source_uris": [
-                "gitlab://gitlab.com/ska-telescope/"
-                "ska-telmodel-data?main#tmdata"
-            ],
-            "array_layout_path": (
-                "instrument/ska1_low/layout/low-layout.json"
-            ),
-        }
-
         cm = CNComponentManagerLow(
-            op_state_model,
-            _input_parameter=InputParameterLow(None),
-            logger=logger,
-            _update_device_callback=mock_update_device_callback,
-            _update_telescope_state_callback=(
-                mock_update_telescope_state_callback
-            ),
-            _update_telescope_health_state_callback=(
-                mock_update_telescope_health_state_callback
-            ),
-            _update_tmc_op_state_callback=(mock_update_tmc_op_state_callback),
-            _update_imaging_callback=mock_update_imaging_callback,
-            _telescope_availability_callback=(
-                mock_telescope_availability_callback
-            ),
-            array_layout_url_callback=array_layout_url_callback,
-            default_array_layout_url_callback=(
-                default_array_layout_url_callback
-            ),
-            default_array_layout_url=default_array_layout_url_low,
-            _event_manager=p_event_manager,
-            _liveliness_probe=LivelinessProbeType.NONE,
+            config=_get_cm_low_config(p_liveliness_probe, p_event_manager)
         )
-        DEVICE_LIST = DEVICE_LIST_LOW
-        cm.default_array_layout_url = {
-            "source_uris": list(
-                [
-                    "gitlab://gitlab.com/ska-telescope/"
-                    "ska-telmodel-data?main#tmdata"
-                ],
-            ),
-            "array_layout_path": "instrument/ska1_low/layout/low-layout.json",
-        }
-
-    for dev in DEVICE_LIST:
+        device_list = DEVICE_LIST_LOW
+        cm.component.shared_bus = bus_manager.get_bus()
+        cm.shared_bus = bus_manager.get_bus()
+    for dev in device_list:
         cm.add_device(dev)
     start_time = time.time()
-    num_devices = len(DEVICE_LIST)
+    num_devices = len(device_list)
     if not p_liveliness_probe:
         cm.setup_event_subscription()
         return cm, start_time
@@ -362,8 +521,7 @@ def create_cm(
         time.sleep(0.2)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
-    # cm.cleanup()
+            pytest.fail(TEST_TIMEOUT)
     cm.setup_event_subscription()
     return cm, start_time
 
@@ -406,7 +564,7 @@ def ensure_telescope_state(cm, state, expected_elapsed_time):
                 "The current telescope state is %s",
                 str(cm.component.telescope_state),
             )
-            pytest.fail("Timeout occurred while executing the test")
+            pytest.fail(TEST_TIMEOUT)
     assert elapsed_time < expected_elapsed_time
 
 
@@ -417,7 +575,7 @@ def ensure_tmc_op_state(cm, state, expected_elapsed_time):
     while cm.component.tmc_op_state != state:
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
+            pytest.fail(TEST_TIMEOUT)
     assert elapsed_time < expected_elapsed_time
 
 
@@ -429,28 +587,28 @@ def ensure_imaging(cm, value, expected_elapsed_time):
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
+            pytest.fail(TEST_TIMEOUT)
     assert elapsed_time < expected_elapsed_time
 
 
-def set_devices_state(devices, state, devFactory):
+def set_devices_state(devices, state, dev_factory):
     """Sets Devices state."""
     for device in devices:
-        proxy = devFactory.get_device(device)
+        proxy = dev_factory.get_device(device)
         proxy.SetDirectState(state)
         assert proxy.State() == state
 
 
-def set_device_state(device, state, devFactory):
+def set_device_state(device, state, dev_factory):
     """Sets device state"""
-    proxy = devFactory.get_device(device)
+    proxy = dev_factory.get_device(device)
     proxy.SetDirectState(state)
     assert proxy.State() == state
 
 
-def set_dish_mode(device, dishmode, devFactory):
+def set_dish_mode(device, dishmode, dev_factory):
     """sets Dish mode"""
-    proxy = devFactory.get_device(device)
+    proxy = dev_factory.get_device(device)
     proxy.SetDirectDishMode(dishmode)
     assert proxy.dishmode == dishmode
 
@@ -522,20 +680,6 @@ def check_mccsmln_availability(cm, expected_status):
             )
 
 
-def event_remover(group_callback, attributes: List[str]) -> None:
-    """Removes residual events from the queue."""
-    for attribute in attributes:
-        try:
-            iterable = group_callback._mock_consumer_group._views[
-                attribute
-            ]._iterable
-            for node in iterable:
-                logger.debug("Event payload removed: %s", repr(node.payload))
-                node.drop()
-        except KeyError:
-            pass
-
-
 def export_device(db, db_info):
     """Export device in database"""
     dev_export = tango.DbDevExportInfo()
@@ -551,7 +695,7 @@ def export_device(db, db_info):
 def check_lrcr_events(
     change_event_callback: MockTangoEventCallbackGroup,
     command_name: str,
-    result_to_check: ResultCode = ResultCode.OK,
+    result_to_check: str = f"[0,{COMMAND_COMPLETED}]",
     retries: int = 20,
     callback_name: str = "longRunningCommandResult",
 ):
@@ -565,9 +709,9 @@ def check_lrcr_events(
         Defaults to ResultCode.OK.
         retries (int):number of events to check. Defaults to 10.
     """
-    COUNT = 0
+    count = 0
     flag = False
-    while not flag and COUNT <= retries:
+    while not flag and count <= retries:
         assertion_data = change_event_callback[
             callback_name
         ].assert_change_event(
@@ -584,7 +728,7 @@ def check_lrcr_events(
             ):
                 logger.debug("%s_UID: %s", command_name, unique_id)
                 flag = True
-        COUNT = COUNT + 1
+        count = count + 1
         time.sleep(1)
     if flag:
         return True
