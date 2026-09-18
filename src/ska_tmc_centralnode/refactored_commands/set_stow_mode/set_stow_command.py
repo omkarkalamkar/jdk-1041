@@ -8,7 +8,6 @@ import os
 from typing import Dict, Tuple, cast
 
 from ska_control_model import ResultCode, TaskStatus
-from ska_tango_base.faults import CommandError, ResultCodeError
 from ska_tmc_common import DishMode
 from ska_tmc_common.adapters import AdapterType
 from ska_tmc_common.v4.command_context import (
@@ -20,6 +19,8 @@ from ska_tmc_common.v4.command_executor import CommandExecutor
 from ska_tmc_common.v4.exceptions.exceptions import (
     AdapterNotFoundError,
     CommandExecutionError,
+    CommandInvocationError,
+    CommandRejectedError,
 )
 
 from ..common.base_command import BaseCNCommand
@@ -50,7 +51,7 @@ class SetStowExecutor(CommandExecutor):
 
                 self._invoke_command(adapter, command, context)
                 executed = executed + 1
-            except (CommandError, ResultCodeError) as err:
+            except (CommandRejectedError, CommandInvocationError) as err:
                 context.command_invoked_callback(command, True, err)
             except Exception:
                 context.command_invoked_callback(command, True)
@@ -95,8 +96,19 @@ class SetStowMode(BaseCNCommand):
         :type cmd_ctx: DeviceCommand
         """
         dish_id = cmd_ctx.device_name.split("/")[-1]
-        if adapter_failure:
+        if adapter_failure and error_message == DISH_UNREACHABLE:
             self.dishln_stow_mode_cmd_exe_data.update({dish_id: error_message})
+            self.logger.error(error_message)
+
+            self.context.results[cmd_ctx.device_name] = CommandResult(
+                cmd_ctx.device_name,
+                ResultCode.OK,
+                error_message,
+            )
+        elif adapter_failure:
+            self.dishln_stow_mode_cmd_exe_data.update(
+                {dish_id: {"result_code": error_message}}
+            )
             self.logger.error(error_message)
 
             self.context.results[cmd_ctx.device_name] = CommandResult(
@@ -104,7 +116,6 @@ class SetStowMode(BaseCNCommand):
                 ResultCode.FAILED,
                 error_message,
             )
-
         else:
             self.dishln_stow_mode_cmd_exe_data.update(
                 {dish_id: {"result_code": None}}

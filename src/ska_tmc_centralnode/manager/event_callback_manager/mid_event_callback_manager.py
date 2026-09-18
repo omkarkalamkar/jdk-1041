@@ -453,9 +453,10 @@ class MidEventCallbackManager(EventCallbackManager[InputParameterMid]):
             if self.check_if_csp_all_dish_ready():
                 self.gpm_unknown_dishes = self.gpm_aggregator.aggregate_gpm()
                 self.logger.debug(
-                    "Command in progress %s and Dish-Vcc command status %s",
+                    "Command in progress %s and Dish-Vcc command status %s %s",
                     self.get_command_in_progress(),
                     self.get_dish_vcc_command_status(),
+                    self.gpm_unknown_dishes,
                 )
                 if (
                     self.gpm_unknown_dishes
