@@ -8,6 +8,7 @@ import os
 from typing import Dict, Tuple, cast
 
 from ska_control_model import ResultCode, TaskStatus
+from ska_tango_base.faults import CommandError, ResultCodeError
 from ska_tmc_common import DishMode
 from ska_tmc_common.adapters import AdapterType
 from ska_tmc_common.v4.command_context import (
@@ -42,15 +43,18 @@ class SetStowExecutor(CommandExecutor):
                     command.device_name,
                     command.adapter_type,
                 )
+
+                if adapter is None:
+                    context.command_invoked_callback(command, True)
+                    continue
+
+                self._invoke_command(adapter, command, context)
+                executed = executed + 1
+            except (CommandError, ResultCodeError) as err:
+                context.command_invoked_callback(command, True, err)
             except Exception:
                 context.command_invoked_callback(command, True)
-                continue
-            if adapter is None:
-                context.command_invoked_callback(command, True)
-                continue
 
-            self._invoke_command(adapter, command, context)
-            executed = executed + 1
         if not executed and context.device_commands:
             dev_names = [cmd.device_name for cmd in context.device_commands]
             raise AdapterNotFoundError(
@@ -79,7 +83,10 @@ class SetStowMode(BaseCNCommand):
         )
 
     def command_invoked_callback(
-        self, cmd_ctx: DeviceCommand, adapter_failure: bool = False
+        self,
+        cmd_ctx: DeviceCommand,
+        adapter_failure: bool = False,
+        error_message: str = DISH_UNREACHABLE,
     ) -> None:
         """The callback to process the command details after invocation.
 
@@ -89,15 +96,13 @@ class SetStowMode(BaseCNCommand):
         """
         dish_id = cmd_ctx.device_name.split("/")[-1]
         if adapter_failure:
-            self.dishln_stow_mode_cmd_exe_data.update(
-                {dish_id: DISH_UNREACHABLE}
-            )
-            self.logger.error(DISH_UNREACHABLE)
+            self.dishln_stow_mode_cmd_exe_data.update({dish_id: error_message})
+            self.logger.error(error_message)
 
             self.context.results[cmd_ctx.device_name] = CommandResult(
                 cmd_ctx.device_name,
-                ResultCode.OK,  # ignore
-                "Dish is unreachable",
+                ResultCode.FAILED,
+                error_message,
             )
 
         else:
