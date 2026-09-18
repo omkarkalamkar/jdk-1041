@@ -107,14 +107,18 @@ class SetStowMode(BaseCNCommand):
             )
         elif adapter_failure:
             self.dishln_stow_mode_cmd_exe_data.update(
-                {dish_id: {"result_code": (ResultCode.FAILED, error_message)}}
+                {
+                    dish_id: {
+                        "result_code": (ResultCode.FAILED, str(error_message))
+                    }
+                }
             )
             self.logger.error(error_message)
 
             self.context.results[cmd_ctx.device_name] = CommandResult(
                 cmd_ctx.device_name,
                 ResultCode.FAILED,
-                error_message,
+                str(error_message),
             )
         else:
             self.dishln_stow_mode_cmd_exe_data.update(
