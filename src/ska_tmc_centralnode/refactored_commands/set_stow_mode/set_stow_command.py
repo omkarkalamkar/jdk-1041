@@ -4,6 +4,7 @@ This module provides functions to execute the SetStowMode command
 on the Dishes.
 """
 import json
+import os
 from typing import Dict, Tuple, cast
 
 from ska_control_model import ResultCode, TaskStatus
@@ -120,8 +121,8 @@ class SetStowMode(BaseCNCommand):
 
     def get_dish_ln_name(self, dish_id: str) -> str:
         """Returns full FQDN of dishln."""
-        return (
-            self.command_runtime_context.dish_leaf_node_prefix + dish_id[-3:]
+        return os.path.join(
+            self.command_runtime_context.dish_leaf_node_prefix, dish_id
         )
 
     def build_device_commands(self) -> None:
@@ -203,7 +204,7 @@ class SetStowMode(BaseCNCommand):
         status = kwargs.get("status", TaskStatus.COMPLETED)
         exception = kwargs.get("exception", "")
 
-        if result[0] == ResultCode.FAILED:
+        if result[0] != ResultCode.OK:
             error_message = (
                 exception + "SetStowMode failed: Command failure"
                 " or dish not in STOW mode: "

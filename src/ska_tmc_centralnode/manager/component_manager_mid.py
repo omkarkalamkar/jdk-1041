@@ -507,8 +507,8 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
         """
         result = []
         for dish in range(1, (num_dishes + 1)):
-            self.add_device(f"{dln_prefix}{dish:03d}")
-            result.append(f"{dln_prefix}{dish:03d}")
+            self.add_device(f"{dln_prefix}/ska{dish:03d}")
+            result.append(f"{dln_prefix}/ska{dish:03d}")
         return result
 
     def _aggregate_telescope_state(self) -> None:
