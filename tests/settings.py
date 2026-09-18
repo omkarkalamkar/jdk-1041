@@ -502,6 +502,12 @@ def create_cm(
         cm.component.shared_bus = bus_manager.get_bus()
         cm.shared_bus = bus_manager.get_bus()
         cm.is_dish_vcc_config_set = True
+        cm.input_parameter.dish_leaf_node_dev_names = [
+            DISH_LEAF_NODE_DEVICE,
+            DISH_LEAF_NODE_DEVICE_099,
+            DISH_LEAF_NODE_DEVICE_500,
+            DISH_LEAF_NODE_DEVICE_999,
+        ]
         cm.dish_vcc_command_status = DishConfigStatus.COMPLETED
     else:
         cm = CNComponentManagerLow(

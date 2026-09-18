@@ -1192,7 +1192,6 @@ optional = false
 python-versions = "*"
 groups = ["dev"]
 files = [
-    {file = "junit-xml-2-1.9.tar.gz", hash = "sha256:3b8d9635c5215f754c7807104f6493e3ea3bc9481e2d33db294560da3a1b00f7"},
     {file = "junit_xml_2-1.9-py2.py3-none-any.whl", hash = "sha256:05093d75fe11120ccd51293884b5ee334ff3bc4b5106647c2bcc928486600588"},
 ]
 
@@ -1220,29 +1219,6 @@ files = [
 astropy = ">=4.1"
 numpy = "*"
 sgp4 = ">=2.7"
-
-[package.source]
-type = "legacy"
-url = "https://pypi.org/simple"
-reference = "PyPI-public"
-
-[[package]]
-name = "katversion"
-version = "1.3"
-description = "Reliable git-based versioning for Python packages"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, <4"
-groups = ["main"]
-files = [
-    {file = "katversion-1.3-py2.py3-none-any.whl", hash = "sha256:c83453fc0bb69be2fdc428fd63ad0250545dc6f5e55fc836f066516762a5594c"},
-    {file = "katversion-1.3.tar.gz", hash = "sha256:96f607d7bcae49cb6d0306d53616b9aaa096b72896af0eb8e2929f3cf829244c"},
-]
-
-[package.dependencies]
-packaging = "*"
-
-[package.extras]
-test = ["nose (>=1.3,<2.0)", "unittest2 (>=0.5.1)"]
 
 [package.source]
 type = "legacy"
