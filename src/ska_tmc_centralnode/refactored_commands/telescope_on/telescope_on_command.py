@@ -183,11 +183,3 @@ class BaseTelescopeOnCN(BaseCNCommand):
                 f"Unavailable devices are {self.unavailable_devices}",
             )
         return super().evaluate_result()
-
-    # def evaluate_result(self) -> tuple[ResultCode, str]:
-    #     if self.unavailable_devices:
-    #         return (
-    #             ResultCode.OK,
-    #             f"Unavailable devices are {self.unavailable_devices}",
-    #         )
-    #     return super().evaluate_result()

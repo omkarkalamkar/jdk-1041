@@ -7,14 +7,11 @@ from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common import AdapterType
 from ska_tmc_common.dev_factory import DevFactory
-
-# from ska_tmc_common.enum import DishMode
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
 
-# from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.refactored_commands.telescope_on import TelescopeOnMid
 from ska_tmc_centralnode.utils.constants import MID_TMC_SUBARRAY
 from tests.mock_callable import MockCallable
@@ -123,7 +120,6 @@ def test_telescope_on_command_fail_subarray(
     unique_id = f"{time.time()}_TelescopeOn"
     task_callback = MockCallable(unique_id)
 
-    # on_command = TelescopeOn(cm, my_adapter_factory, logger=logger)
     cm.adapter_factory = my_adapter_factory
     on_command = TelescopeOnMid(
         command_runtime_context=cm._get_telescope_on_context(),
@@ -169,7 +165,6 @@ def test_telescope_on_command_task_completed(
     unique_id = f"{time.time()}_TelescopeOn"
     task_callback = MockCallable(unique_id)
 
-    # on_command = TelescopeOn(cm, my_adapter_factory, logger=logger)
     on_command = TelescopeOnMid(
         command_runtime_context=cm._get_telescope_on_context(),
         adapter_provider=my_adapter_factory,
@@ -180,7 +175,6 @@ def test_telescope_on_command_task_completed(
         task_callback=task_callback,
         task_abort_event=None,
     )
-    # on_command.telescope_on(task_callback=task_callback)
     time.sleep(0.1)
     assert task_callback.status == TaskStatus.COMPLETED
 

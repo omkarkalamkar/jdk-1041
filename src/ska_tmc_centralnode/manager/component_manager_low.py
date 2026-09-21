@@ -353,33 +353,6 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
         self.subsystem_assigned_per_subarray.pop(subarray_id, None)
         self.pss_beams_assigned_per_subarray.pop(subarray_id, None)
 
-    # def _get_telescope_on_context(self) -> LowTelescopeOnContext:
-    #     """Build LowTelescopeOnContext bound to this component manager."""
-    #     return LowTelescopeOnContext(
-    #         command_completion_condition=self.command_completion_cond,
-    #         command_timeout=self.config.timeout_config.command_timeout,
-    #         cmd_inprogress_ctx=CommandInProgressContext(
-    #             update_name=lambda name: setattr(
-    #                 self, "command_in_progress", name
-    #             ),
-    #             clear=lambda _: setattr(self, "command_in_progress", ""),
-    #             get_name=lambda: self.command_in_progress,
-    #         ),
-    #         update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
-    #         log_state=self.log_state,
-    #         component=self.component,
-    #         csp_mln_dev_name=self.input_parameter.csp_mln_dev_name,
-    #         sdp_mln_dev_name=self.input_parameter.sdp_mln_dev_name,
-    #         subarray_trl_prefix=self.config.subarray_trl_prefix,
-    #         check_if_csp_mln_is_available=self.check_if_csp_mln_is_available,
-    #         check_if_sdp_mln_is_available=self.check_if_sdp_mln_is_available,
-    #         get_subarray_device_names=self.get_subarray_device_names,
-    #         get_device=self.get_device,
-    #         mccs_mln_dev_name=self.input_parameter.mccs_mln_dev_name,
-    #
-    # check_if_mccs_mln_is_available=self.check_if_mccs_mln_is_available,
-    #     )
-
     def _get_telescope_on_context(self) -> LowTelescopeOnContext:
         """Build LowTelescopeOnContext bound to this component manager."""
         return LowTelescopeOnContext(

@@ -41,8 +41,6 @@ from ska_tmc_common.v2.tmc_component_manager import TmcComponentManager
 from tango.utils import PyTangoThread
 
 from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
-
-# from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.commands.telescope_standby_command import (
     TelescopeStandby,
 )
@@ -624,25 +622,6 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
             "get_subarray_device_names": self.get_subarray_device_names,
             "get_device": self.get_device,
         }
-
-    # def telescope_on(
-    #     self,
-    #     task_callback: TaskCallbackType,
-    #     task_abort_event=None,
-    # ):
-    #     """
-    #     Turn the Telescope On.
-
-    #     :return: a result code and message
-    #     """
-    #     telescope_on_command_object = TelescopeOn(
-    #         self, adapter_factory=self.adapter_factory, logger=self.logger
-    #     )
-
-    #     return telescope_on_command_object.telescope_on(
-    #         task_callback=task_callback,
-    #         task_abort_event=task_abort_event,
-    #     )
 
     def telescope_on(
         self,
