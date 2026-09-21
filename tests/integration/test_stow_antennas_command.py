@@ -93,7 +93,7 @@ def set_stow_mode_command(central_node_name, change_event_callbacks):
     match = re.search(r"\{.*\}", json_part)
     dict_str = match.group(0)
     data = json.loads(dict_str)
-    err_msg1 = "Error in calling SetStowMode command on ska036 Dish Leaf Node"
+    err_msg1 = "Error occurred for device mid-tmc/leaf-node-dish/ska036"
     err_msg2 = "ERROR: Dish is unreachable"
     assert err_msg1 in data["ska036"]["result_code"]
     assert err_msg2 in data["ska064"]

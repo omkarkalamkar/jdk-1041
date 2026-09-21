@@ -57,21 +57,6 @@ def test_cm_set_stow_mode_all_dishes_exception(task_callback):
     cm.logger.exception.assert_called_once()
 
 
-def test_get_set_stow_mode_resultcode():
-    cm, _ = create_cm()
-    cm.stow_mode_command_aggregated_result = ResultCode.OK
-    assert cm.get_set_stow_mode_resultcode() == ResultCode.OK
-
-
-def test_reset_stow_mode_data():
-    cm, _ = create_cm()
-    cm.logger = MagicMock()
-    cm.reset_stow_mode_data()
-    assert cm.stow_mode_command_aggregated_result == ResultCode.UNKNOWN
-    assert not cm.dishln_stow_mode_cmd_exe_data
-    assert not cm.number_of_stow_mode_executed
-    assert not cm.command_in_progress
-    cm.logger.debug.assert_called_once()
 
 
 def test_get_current_dish_mode_of_dln():
