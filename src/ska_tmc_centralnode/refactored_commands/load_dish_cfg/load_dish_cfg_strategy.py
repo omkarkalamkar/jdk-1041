@@ -1,5 +1,4 @@
-"""Strategy for LoadDishCfg command.
-"""
+"""Strategy for LoadDishCfg command."""
 
 import json
 from typing import Tuple

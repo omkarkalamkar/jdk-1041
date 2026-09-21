@@ -2,6 +2,7 @@
 # flake8: noqa
 # standard python imports
 """This module is for validating input arguments"""
+
 import json
 
 import pytest

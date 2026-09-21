@@ -8,6 +8,7 @@
 # See LICENSE for more info.
 
 """Release information for Python Package"""
+
 # pylint:disable=invalid-name
 name = """ska-tmc-centralnode"""
 version = "1.7.1"

@@ -34,10 +34,8 @@ def check_cspmln_availability(central_node, expected_status):
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
-            pytest.fail(
-                "Timeout occurred while checking \
-                    the CspMasterLeafNode availability."
-            )
+            pytest.fail("Timeout occurred while checking \
+                    the CspMasterLeafNode availability.")
 
 
 def check_sdpmln_availability(central_node, expected_status):
@@ -50,10 +48,8 @@ def check_sdpmln_availability(central_node, expected_status):
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
-            pytest.fail(
-                "Timeout occurred while checking \
-                the SdpMasterLeafNode availability."
-            )
+            pytest.fail("Timeout occurred while checking \
+                the SdpMasterLeafNode availability.")
 
 
 def check_mccsmln_availability(central_node, expected_status):
@@ -66,10 +62,8 @@ def check_mccsmln_availability(central_node, expected_status):
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
-            pytest.fail(
-                "Timeout occurred while checking the\
-              MccsMasterLeafNode availability."
-            )
+            pytest.fail("Timeout occurred while checking the\
+              MccsMasterLeafNode availability.")
 
 
 def telescope_availability(central_node_fqdn):

@@ -282,7 +282,7 @@ def test_load_dish_cnfg_command_fail_csp_master(
     load_dish_cnfg_command = LoadDishCfg(
         cm._get_load_dish_cfg_context(), adapter_factory, logger=logger
     )
-    (res_code, _) = load_dish_cnfg_command.execute(
+    res_code, _ = load_dish_cnfg_command.execute(
         dish_cfg_input_str,
         task_callback=mock.Mock(),
         task_abort_event=mock.Mock(),

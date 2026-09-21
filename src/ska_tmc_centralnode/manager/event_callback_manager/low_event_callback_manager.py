@@ -1,5 +1,4 @@
-"""Module to manage all Low telescope the change event callbacks.
-"""
+"""Module to manage all Low telescope the change event callbacks."""
 
 from dataclasses import dataclass
 from typing import Callable
