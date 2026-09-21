@@ -41,7 +41,8 @@ from ska_tmc_common.v2.tmc_component_manager import TmcComponentManager
 from tango.utils import PyTangoThread
 
 from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
-from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
+
+# from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.commands.telescope_standby_command import (
     TelescopeStandby,
 )
@@ -56,6 +57,9 @@ from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
+)
+from ska_tmc_centralnode.refactored_commands.assignresources import (
+    CommandInProgressContext,
 )
 
 from .aggregators import (
@@ -589,6 +593,57 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
         """Getter method for TMC Op State Model"""
         return self.component.tmc_op_state
 
+    def get_subarray_device_names(self) -> List[str]:
+        """Return list of Subarray device names."""
+        return list(self.input_parameter.subarray_dev_names)
+
+    def _get_common_telescope_on_context_kwargs(self) -> dict:
+        """Common kwargs shared by Mid and Low TelescopeOn contexts."""
+        return {
+            "command_completion_condition": self.command_completion_cond,
+            "command_timeout": self.config.timeout_config.command_timeout,
+            "cmd_inprogress_ctx": CommandInProgressContext(
+                update_name=lambda name: setattr(
+                    self, "command_in_progress", name
+                ),
+                clear=lambda _: setattr(self, "command_in_progress", ""),
+                get_name=lambda: self.command_in_progress,
+            ),
+            "update_abort_evt": lambda evt: setattr(self, "abort_event", evt),
+            "log_state": self.log_state,
+            "component": self.component,
+            "csp_mln_dev_name": self.input_parameter.csp_mln_dev_name,
+            "sdp_mln_dev_name": self.input_parameter.sdp_mln_dev_name,
+            "subarray_trl_prefix": self.config.subarray_trl_prefix,
+            "check_if_csp_mln_is_available": (
+                self.check_if_csp_mln_is_available
+            ),
+            "check_if_sdp_mln_is_available": (
+                self.check_if_sdp_mln_is_available
+            ),
+            "get_subarray_device_names": self.get_subarray_device_names,
+            "get_device": self.get_device,
+        }
+
+    # def telescope_on(
+    #     self,
+    #     task_callback: TaskCallbackType,
+    #     task_abort_event=None,
+    # ):
+    #     """
+    #     Turn the Telescope On.
+
+    #     :return: a result code and message
+    #     """
+    #     telescope_on_command_object = TelescopeOn(
+    #         self, adapter_factory=self.adapter_factory, logger=self.logger
+    #     )
+
+    #     return telescope_on_command_object.telescope_on(
+    #         task_callback=task_callback,
+    #         task_abort_event=task_abort_event,
+    #     )
+
     def telescope_on(
         self,
         task_callback: TaskCallbackType,
@@ -597,15 +652,11 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
         """
         Turn the Telescope On.
 
-        :return: a result code and message
+        Overridden in Mid / Low with the refactored command.
         """
-        telescope_on_command_object = TelescopeOn(
-            self, adapter_factory=self.adapter_factory, logger=self.logger
-        )
-
-        return telescope_on_command_object.telescope_on(
-            task_callback=task_callback,
-            task_abort_event=task_abort_event,
+        raise NotImplementedError(
+            "telescope_on must be implemented in CNComponentManagerMid / "
+            "CNComponentManagerLow"
         )
 
     def telescope_off(

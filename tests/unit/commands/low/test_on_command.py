@@ -38,18 +38,23 @@ def test_low_telescope_on_command(
     dev_factory = DevFactory()
     csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
     sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
+    mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
+
     csp_mln.SetSubsystemAvailable(True)
     sdp_mln.SetSubsystemAvailable(True)
+    mccs_mln.SetSubsystemAvailable(True)
+
     check_cspmln_availability(cm, True)
     check_sdpmln_availability(cm, True)
-    assert (cm.component.telescope_availability)[
-        "csp_master_leaf_node"
-    ] is True
-    assert (cm.component.telescope_availability)[
-        "sdp_master_leaf_node"
-    ] is True
+    check_mccsmln_availability(cm, True)
+
+    assert cm.component.telescope_availability["csp_master_leaf_node"] is True
+    assert cm.component.telescope_availability["sdp_master_leaf_node"] is True
+    assert cm.component.telescope_availability["mccs_master_leaf_node"] is True
+
     cm.is_command_allowed("TelescopeOn")
     cm.telescope_on(task_callback=task_callback)
+
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
@@ -57,8 +62,61 @@ def test_low_telescope_on_command(
         call_kwargs={
             "status": TaskStatus.COMPLETED,
             "result": (ResultCode.OK, "Command Completed"),
-        }
+        },
+        lookahead=5,
+        consume_nonmatches=True,
     )
+
+    # task_callback.assert_against_call(
+    #     call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    # )
+    # call = task_callback.assert_against_call(
+    #     call_kwargs={"status": TaskStatus.COMPLETED},
+    #     lookahead=5,
+    #     consume_nonmatches=True,
+    # )
+    # result_code, message = call["call_kwargs"]["result"]
+    # assert (
+    #     result_code == ResultCode.OK
+    # ), f"Expected ResultCode.OK, got {result_code}: {message}"
+
+
+# @pytest.mark.SKA_low
+# def test_low_telescope_on_command(
+#     tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
+# ):
+#     # import debugpy; debugpy.debug_this_thread()
+#     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
+#     elapsed_time = time.time() - start_time
+#     logger.info(
+#         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+#     )
+#     dev_factory = DevFactory()
+#     csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
+#     sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
+#     csp_mln.SetSubsystemAvailable(True)
+#     sdp_mln.SetSubsystemAvailable(True)
+#     check_cspmln_availability(cm, True)
+#     check_sdpmln_availability(cm, True)
+#     check_mccsmln_availability(cm, True)
+#     assert (cm.component.telescope_availability)[
+#         "csp_master_leaf_node"
+#     ] is True
+#     assert (cm.component.telescope_availability)[
+#         "sdp_master_leaf_node"
+#     ] is True
+#     assert cm.component.telescope_availability["mccs_master_leaf_node"] is True
+#     cm.is_command_allowed("TelescopeOn")
+#     cm.telescope_on(task_callback=task_callback)
+#     task_callback.assert_against_call(
+#         call_kwargs={"status": TaskStatus.IN_PROGRESS}
+#     )
+#     task_callback.assert_against_call(
+#         call_kwargs={
+#             "status": TaskStatus.COMPLETED,
+#             "result": (ResultCode.OK, "Command Completed"),
+#         }
+#     )
 
 
 @pytest.mark.SKA_low

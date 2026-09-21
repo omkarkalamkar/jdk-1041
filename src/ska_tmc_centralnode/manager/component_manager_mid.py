@@ -10,7 +10,7 @@ import copy
 import json
 import threading
 import time
-from typing import Callable, Dict, List, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Tuple, Union, cast
 
 from ska_control_model import TaskStatus
 from ska_tango_base.base import TaskCallbackType
@@ -69,6 +69,10 @@ from ska_tmc_centralnode.refactored_commands.releaseresources import (
 from ska_tmc_centralnode.refactored_commands.set_gpm.contexts import GPMContext
 from ska_tmc_centralnode.refactored_commands.set_gpm.set_gpm_command import (
     SetGlobalPointingModel,
+)
+from ska_tmc_centralnode.refactored_commands.telescope_on import (
+    MidTelescopeOnContext,
+    TelescopeOnMid,
 )
 
 # pylint:enable=line-too-long
@@ -311,6 +315,20 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
 
         """
         return self.stow_mode_command_aggregated_result
+
+    # def get_dish_devices(self) -> Dict[str, Any]:
+    #     """Return mapping of dish leaf-node name →
+    #     DeviceInfo (with dishMode)."""
+    #     result = {}
+    #     for name in self.get_dish_leaf_node_device_names():
+    #         info = self.get_device(name)
+    #         if info is not None:
+    #             result[name] = info
+    #     return result
+
+    def get_subarray_device_names(self) -> List[str]:
+        """Return list of Subarray device names."""
+        return list(self.input_parameter.subarray_dev_names)
 
     @property
     def dish_vcc_command_status(self) -> DishConfigStatus:
@@ -957,6 +975,40 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
                 exception_msg,
             )
         return argin, exception_msg
+
+    def get_dish_devices(self) -> Dict[str, Any]:
+        """Return mapping of dish leaf-node name → DeviceInfo."""
+        result = {}
+        for name in self.get_dish_leaf_node_device_names():
+            info = self.get_device(name)
+            if info is not None:
+                result[name] = info
+        return result
+
+    def _get_telescope_on_context(self) -> MidTelescopeOnContext:
+        """Build MidTelescopeOnContext bound to this component manager."""
+        return MidTelescopeOnContext(
+            **self._get_common_telescope_on_context_kwargs(),
+            get_dish_devices=self.get_dish_devices,
+        )
+
+    # @exception_handler(command_name="TelescopeOn")
+    def telescope_on(
+        self,
+        task_callback: TaskCallbackType,
+        task_abort_event=None,
+    ) -> None:
+        """Turn the Telescope On (Mid – refactored)."""
+        telescope_on_command = TelescopeOnMid(
+            command_runtime_context=self._get_telescope_on_context(),
+            adapter_provider=self.adapter_factory,
+            logger=self.logger,
+        )
+        telescope_on_command.execute(
+            argin=None,
+            task_callback=task_callback,
+            task_abort_event=task_abort_event,
+        )
 
     def _get_assign_context(self) -> MidAssignResourcesContext:
         """Build MidAssignResourcesContext bound to this component manager.

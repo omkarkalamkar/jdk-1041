@@ -9,7 +9,7 @@ package.
 
 import json
 from collections import defaultdict
-from typing import Callable, Dict, Tuple, Union
+from typing import Callable, Dict, List, Tuple, Union
 
 from ska_schemas.schema import validate
 from ska_tango_base.base import TaskCallbackType
@@ -39,6 +39,10 @@ from ska_tmc_centralnode.refactored_commands.assignresources import (
 from ska_tmc_centralnode.refactored_commands.releaseresources import (
     LowReleaseResourcesContext,
     ReleaseResourcesLow,
+)
+from ska_tmc_centralnode.refactored_commands.telescope_on import (
+    LowTelescopeOnContext,
+    TelescopeOnLow,
 )
 from ska_tmc_centralnode.utils.constants import (
     LOW_ASSIGN_RESOURCES_SCHEMA_VERSION,
@@ -161,6 +165,10 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
             }
         )
         return event_handlers
+
+    def get_subarray_device_names(self) -> List[str]:
+        """Return list of Subarray device names."""
+        return list(self.input_parameter.subarray_dev_names)
 
     @property
     def assign_resources_schema_version(self) -> str:
@@ -344,6 +352,59 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
         """
         self.subsystem_assigned_per_subarray.pop(subarray_id, None)
         self.pss_beams_assigned_per_subarray.pop(subarray_id, None)
+
+    # def _get_telescope_on_context(self) -> LowTelescopeOnContext:
+    #     """Build LowTelescopeOnContext bound to this component manager."""
+    #     return LowTelescopeOnContext(
+    #         command_completion_condition=self.command_completion_cond,
+    #         command_timeout=self.config.timeout_config.command_timeout,
+    #         cmd_inprogress_ctx=CommandInProgressContext(
+    #             update_name=lambda name: setattr(
+    #                 self, "command_in_progress", name
+    #             ),
+    #             clear=lambda _: setattr(self, "command_in_progress", ""),
+    #             get_name=lambda: self.command_in_progress,
+    #         ),
+    #         update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
+    #         log_state=self.log_state,
+    #         component=self.component,
+    #         csp_mln_dev_name=self.input_parameter.csp_mln_dev_name,
+    #         sdp_mln_dev_name=self.input_parameter.sdp_mln_dev_name,
+    #         subarray_trl_prefix=self.config.subarray_trl_prefix,
+    #         check_if_csp_mln_is_available=self.check_if_csp_mln_is_available,
+    #         check_if_sdp_mln_is_available=self.check_if_sdp_mln_is_available,
+    #         get_subarray_device_names=self.get_subarray_device_names,
+    #         get_device=self.get_device,
+    #         mccs_mln_dev_name=self.input_parameter.mccs_mln_dev_name,
+    #
+    # check_if_mccs_mln_is_available=self.check_if_mccs_mln_is_available,
+    #     )
+
+    def _get_telescope_on_context(self) -> LowTelescopeOnContext:
+        """Build LowTelescopeOnContext bound to this component manager."""
+        return LowTelescopeOnContext(
+            **self._get_common_telescope_on_context_kwargs(),
+            mccs_mln_dev_name=self.input_parameter.mccs_mln_dev_name,
+            check_if_mccs_mln_is_available=self.check_if_mccs_mln_is_available,
+        )
+
+    # @exception_handler(command_name="TelescopeOn")
+    def telescope_on(
+        self,
+        task_callback: TaskCallbackType,
+        task_abort_event=None,
+    ) -> None:
+        """Turn the Telescope On (Low – refactored)."""
+        telescope_on_command = TelescopeOnLow(
+            command_runtime_context=self._get_telescope_on_context(),
+            adapter_provider=self.adapter_factory,
+            logger=self.logger,
+        )
+        telescope_on_command.execute(
+            argin=None,
+            task_callback=task_callback,
+            task_abort_event=task_abort_event,
+        )
 
     def _get_assign_context(self) -> LowAssignResourcesContext:
         """Build LowAssignResourcesContext bound to this component manager.
