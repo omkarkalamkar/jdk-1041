@@ -57,8 +57,6 @@ def test_cm_set_stow_mode_all_dishes_exception(task_callback):
     cm.logger.exception.assert_called_once()
 
 
-
-
 def test_get_current_dish_mode_of_dln():
     cm, _ = create_cm()
     dish_id = "ska001"
