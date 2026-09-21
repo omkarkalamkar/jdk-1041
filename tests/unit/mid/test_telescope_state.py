@@ -70,63 +70,69 @@ def devices_to_load():
     )
 
 
-def set_device_init(devFactory, cm, expected_elapsed_time):
+def set_device_init(dev_factory, cm, expected_elapsed_time):
     """initialises devices"""
-    set_device_state(MID_CSP_MASTER_DEVICE, tango.DevState.INIT, devFactory)
-    set_device_state(MID_SDP_MASTER_DEVICE, tango.DevState.DISABLE, devFactory)
-    set_device_state(DISH_MASTER_DEVICE, tango.DevState.OFF, devFactory)
+    set_device_state(MID_CSP_MASTER_DEVICE, tango.DevState.INIT, dev_factory)
+    set_device_state(
+        MID_SDP_MASTER_DEVICE, tango.DevState.DISABLE, dev_factory
+    )
+    set_device_state(DISH_MASTER_DEVICE, tango.DevState.OFF, dev_factory)
     ensure_telescope_state(cm, tango.DevState.INIT, expected_elapsed_time)
 
 
 def test_telescope_state_init(tango_context):
     """Test telescope state initialisation."""
-    devFactory = DevFactory()
+    dev_factory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_device_init(
-        devFactory, cm, 30
+        dev_factory, cm, 30
     )  # Here expected elapsed time is set to 12 since  set_state()
     # API is taking more time to set the state and hence actual elapsed
     # time is increasing
     assert cm.component.telescope_state == tango.DevState.INIT
 
 
-def set_one_device_fault(devFactory, cm, expected_elapsed_time):
+def set_one_device_fault(dev_factory, cm, expected_elapsed_time):
     """Sets one device faulty"""
-    set_device_state(MID_CSP_MASTER_DEVICE, tango.DevState.FAULT, devFactory)
-    set_device_state(MID_SDP_MASTER_DEVICE, tango.DevState.STANDBY, devFactory)
-    set_device_state(DISH_MASTER_DEVICE, tango.DevState.OFF, devFactory)
+    set_device_state(MID_CSP_MASTER_DEVICE, tango.DevState.FAULT, dev_factory)
+    set_device_state(
+        MID_SDP_MASTER_DEVICE, tango.DevState.STANDBY, dev_factory
+    )
+    set_device_state(DISH_MASTER_DEVICE, tango.DevState.OFF, dev_factory)
     ensure_telescope_state(cm, tango.DevState.FAULT, expected_elapsed_time)
 
 
 def test_telescope_state_fault_over_standby(tango_context):
     """Test telescope state fault over standby"""
-    devFactory = DevFactory()
+    dev_factory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
-    set_one_device_fault(devFactory, cm, 40)
+    set_one_device_fault(dev_factory, cm, 40)
     assert cm.component.telescope_state == tango.DevState.FAULT
 
 
-def set_device_standby(devFactory, cm, expected_elapsed_time):
+def set_device_standby(dev_factory, cm, expected_elapsed_time):
     """Sets device to standby"""
-    set_device_state(MID_CSP_MASTER_DEVICE, tango.DevState.STANDBY, devFactory)
-    set_device_state(MID_SDP_MASTER_DEVICE, tango.DevState.ON, devFactory)
+    set_device_state(
+        MID_CSP_MASTER_DEVICE, tango.DevState.STANDBY, dev_factory
+    )
+    set_device_state(MID_SDP_MASTER_DEVICE, tango.DevState.ON, dev_factory)
     for dish in [
         DISH_LEAF_NODE_DEVICE,
         DISH_LEAF_NODE_DEVICE_099,
         DISH_LEAF_NODE_DEVICE_500,
         DISH_LEAF_NODE_DEVICE_999,
     ]:
-        set_dish_mode(dish, DishMode.STANDBY_LP, devFactory)
+        set_dish_mode(dish, DishMode.STANDBY_LP, dev_factory)
 
     ensure_telescope_state(cm, tango.DevState.STANDBY, expected_elapsed_time)
 
 
 def test_telescope_state_standby(tango_context):
     """Tests telescope state standby"""
-    devFactory = DevFactory()
+    dev_factory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_device_standby(
-        devFactory, cm, 40
+        dev_factory, cm, 40
     )  # Here expected elapsed time is set to 15 since  set_state()
     # API is taking more time to set the state and hence actual elapsed
     # time is increasing

@@ -26,7 +26,7 @@ class TestDishConfigValidator:
         dish_config_validator = DishConfigValidator(
             dish_config_json, 1, 1177, cm.validate_dish_ids
         )
-        is_valid, msg = dish_config_validator.is_json_valid()
+        is_valid, _ = dish_config_validator.is_json_valid()
         assert is_valid is True
 
     def test_dish_config_validator_for_invalid_dishids(self):
