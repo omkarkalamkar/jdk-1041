@@ -3,6 +3,7 @@
 This module provides functions to execute the SetStowMode command
 on the Dishes.
 """
+
 import json
 import os
 from typing import Dict, Tuple, cast

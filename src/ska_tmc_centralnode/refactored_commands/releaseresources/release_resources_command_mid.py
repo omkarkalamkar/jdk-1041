@@ -1,4 +1,5 @@
 """ReleaseResourcesMid command class for CentralNode."""
+
 import logging
 
 from ska_tmc_common import AdapterFactory

@@ -1,6 +1,5 @@
 """Test module for assign resources unavailability"""
 
-
 import time
 
 import pytest

@@ -1,4 +1,5 @@
 """Test Module for SetStowMode command"""
+
 import json
 import re
 import time

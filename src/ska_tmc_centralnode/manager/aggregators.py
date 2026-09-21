@@ -328,9 +328,9 @@ class TelescopeAvailabilityAggregator(Aggregator):
         if device.unresponsive:
             telescope_availability["csp_master_leaf_node"] = False
         else:
-            telescope_availability[
-                "csp_master_leaf_node"
-            ] = self._component_manager.csp_mln_availability
+            telescope_availability["csp_master_leaf_node"] = (
+                self._component_manager.csp_mln_availability
+            )
 
     def _update_sdpln_availability(
         self,
@@ -347,9 +347,9 @@ class TelescopeAvailabilityAggregator(Aggregator):
         if device.unresponsive:
             telescope_availability["sdp_master_leaf_node"] = False
         else:
-            telescope_availability[
-                "sdp_master_leaf_node"
-            ] = self._component_manager.sdp_mln_availability
+            telescope_availability["sdp_master_leaf_node"] = (
+                self._component_manager.sdp_mln_availability
+            )
 
     def update_availability(
         self,
@@ -402,9 +402,9 @@ class TelescopeAvailabilityAggregatorLow(TelescopeAvailabilityAggregator):
         if device.unresponsive:
             telescope_availability["mccs_master_leaf_node"] = False
         else:
-            telescope_availability[
-                "mccs_master_leaf_node"
-            ] = self._component_manager.mccs_mln_availability
+            telescope_availability["mccs_master_leaf_node"] = (
+                self._component_manager.mccs_mln_availability
+            )
 
     def update_availability(
         self,
@@ -513,11 +513,11 @@ class DishAttrValueAggregator:
             dish_kvalue_validation_result = ResultCode(
                 int(kvalue_validation_result)
             )
-            self.dln_kvalue_validation_results[
-                dish_leaf_node_name
-            ] = DISH_KVALUE_VALIDATION_RESULT_STATUS[
-                dish_kvalue_validation_result
-            ]
+            self.dln_kvalue_validation_results[dish_leaf_node_name] = (
+                DISH_KVALUE_VALIDATION_RESULT_STATUS[
+                    dish_kvalue_validation_result
+                ]
+            )
             # Update the Central Node result attribute.
             self.update_central_node_with_result()
 

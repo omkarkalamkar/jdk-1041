@@ -1,5 +1,6 @@
 """Module to manage all Mid telescope the change event callbacks.
 """
+
 import json
 import threading
 import time

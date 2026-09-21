@@ -280,13 +280,13 @@ class AbstractCentralNode(TMCBaseDevice):
     def transformedInternalModel_read(self):
         """Tranformed InternalModelRead"""
         result = json.loads(super().transformedInternalModel_read())
-        result[
-            "telescope_state"
-        ] = self.component_manager.get_telescope_state()
+        result["telescope_state"] = (
+            self.component_manager.get_telescope_state()
+        )
         result["tmc_op_state"] = self.component_manager.get_tmc_op_state()
-        result[
-            "telescope_health_state"
-        ] = self.component_manager.get_telescope_health_state()
+        result["telescope_health_state"] = (
+            self.component_manager.get_telescope_health_state()
+        )
         return json.dumps(result)
 
     # --------

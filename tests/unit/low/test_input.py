@@ -1,6 +1,5 @@
 """Test case module"""
 
-
 from unittest.mock import Mock
 
 from ska_tmc_centralnode.model.input import InputParameterLow

@@ -2,6 +2,7 @@
 EventProcessor encapsulates event queue management and worker thread
 dispatch for CentralNodeComponentManager.
 """
+
 import threading
 from logging import Logger
 from queue import Empty, Queue

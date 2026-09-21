@@ -1,4 +1,5 @@
 """Command allowance validation collaborator for CentralNode."""
+
 from logging import Logger
 from typing import Any, Callable, Generic, List, TypeVar, cast
 
@@ -200,9 +201,9 @@ class CommandAllowanceValidator(Generic[T]):
     def _check_if_device_is_responsive(self, dev_names: List[str]) -> None:
         """checks if the device is responsive"""
 
-        cast(
-            Any, self._check_if_device_is_responsive
-        ).retry.stop = stop_after_attempt(self.retry_attempts)
+        cast(Any, self._check_if_device_is_responsive).retry.stop = (
+            stop_after_attempt(self.retry_attempts)
+        )
         cast(Any, self._check_if_device_is_responsive).retry.wait = wait_fixed(
             self.retry_delay
         )
@@ -426,9 +427,9 @@ class MidCommandAllowanceValidator(
             get_op_state_model,
         )
         self.dish_vcc_init_enabled: bool = dish_vcc_init_enabled
-        self.get_dish_vcc_config_set: Callable[
-            [], bool
-        ] = get_dish_vcc_config_set
+        self.get_dish_vcc_config_set: Callable[[], bool] = (
+            get_dish_vcc_config_set
+        )
 
     def check_device_responsiveness_command(self, subarray_id: int) -> None:
         """

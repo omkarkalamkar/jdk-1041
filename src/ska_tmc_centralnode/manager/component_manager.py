@@ -85,9 +85,9 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
     the TMC and telescope state aggregation
     """
 
-    COMMAND_NOT_IMPLEMENTED: ClassVar[
-        str
-    ] = "Command is not Implemented in Central Node."
+    COMMAND_NOT_IMPLEMENTED: ClassVar[str] = (
+        "Command is not Implemented in Central Node."
+    )
     _array_layout_url: Signal = Signal[dict](stored=True)
     _default_array_layout_url: Signal = Signal[dict](stored=True)
 
