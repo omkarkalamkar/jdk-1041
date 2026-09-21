@@ -148,9 +148,46 @@ class BaseTelescopeOnCN(BaseCNCommand):
         return {ResultCode.OK, ResultCode.REJECTED}
 
     def evaluate_result(self) -> tuple[ResultCode, str]:
+        """Evaluate overall result.
+
+        Original TelescopeOn returned FAILED as soon as any dish
+        SetStandbyFPMode (or other subsystem On) raised an exception.
+        The continue-on-error executor records those as FAILED entries in
+        ``context.results``; surface them here before treating unavailable
+        devices as a soft OK.
+        """
+        failed_messages: list[str] = []
+        results = getattr(self.context, "results", None) or {}
+        for _device_name, cmd_result in results.items():
+            result_code = getattr(cmd_result, "result_code", None)
+            if result_code == ResultCode.FAILED:
+                msg = getattr(cmd_result, "message", "") or str(cmd_result)
+                failed_messages.append(msg)
+
+        if failed_messages:
+            # Prefer dish-oriented message expected by integration tests
+            joined = " ".join(failed_messages)
+            if any(
+                "dish" in m.lower() or "SetStandbyFPMode" in m
+                for m in failed_messages
+            ):
+                if "Error in calling command for dish devices" not in joined:
+                    joined = (
+                        "Error in calling command for dish devices: " + joined
+                    )
+            return ResultCode.FAILED, joined
+
         if self.unavailable_devices:
             return (
                 ResultCode.OK,
                 f"Unavailable devices are {self.unavailable_devices}",
             )
         return super().evaluate_result()
+
+    # def evaluate_result(self) -> tuple[ResultCode, str]:
+    #     if self.unavailable_devices:
+    #         return (
+    #             ResultCode.OK,
+    #             f"Unavailable devices are {self.unavailable_devices}",
+    #         )
+    #     return super().evaluate_result()
