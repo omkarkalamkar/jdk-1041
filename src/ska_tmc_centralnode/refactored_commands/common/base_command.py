@@ -30,7 +30,7 @@ class BaseCNCommand(BaseTMCCommand):
         """Initializes the BaseCNCommand class.
         :param command_runtime_context: Command context
             to manage data from commands.
-        :type command_runtime_context: Context_T
+        :type command_runtime_context: CommandRuntimeContext
         :param adapter_provider: Instance of adapter factory to fetch
             requried adapters.
         :type adapter_provider: AdapterFactory

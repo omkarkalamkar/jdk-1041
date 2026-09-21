@@ -74,7 +74,6 @@ class SetStowMode(BaseCNCommand):
     ):
         super().__init__(command_runtime_context, adapter_provider, logger)
         self.receptors_with_stow_mode_set: list[str] = []
-        self.command_runtime_context: StowContext = command_runtime_context
         self.dishln_stow_mode_cmd_exe_data: Dict[
             str, str | Dict[str, Tuple]
         ] = {}

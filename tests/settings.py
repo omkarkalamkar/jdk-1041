@@ -98,6 +98,7 @@ DEVICE_LIST_MID = [
 ]
 COMMAND_COMPLETED = "Command Completed"
 TEST_TIMEOUT = "Timeout occurred while executing the test"
+TIMEOUT_AVAILABILITY = "Timeout occurred while checking availability."
 DEVICE_LIST_LOW = [
     "low-tmc/leaf-node-mccs/0",
     "low-mccs/control/control",
@@ -629,10 +630,7 @@ def check_subarray_availability(central_node, subarray_fqdn, expected_status):
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
-            pytest.fail(
-                "Timeout occurred while checking the SubarrayNode\
-                      availability."
-            )
+            pytest.fail(TIMEOUT_AVAILABILITY)
 
 
 def check_cspmln_availability(cm, expected_status):
@@ -646,10 +644,7 @@ def check_cspmln_availability(cm, expected_status):
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
-            pytest.fail(
-                "Timeout occurred while checking the Csp Master Leaf Node."
-                + " availability."
-            )
+            pytest.fail(TIMEOUT_AVAILABILITY)
 
 
 def check_sdpmln_availability(cm, expected_status):
@@ -663,10 +658,7 @@ def check_sdpmln_availability(cm, expected_status):
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
-            pytest.fail(
-                "Timeout occurred while checking the Sdp Master Leaf Node."
-                + " availability."
-            )
+            pytest.fail(TIMEOUT_AVAILABILITY)
 
 
 def check_mccsmln_availability(cm, expected_status):
@@ -680,10 +672,7 @@ def check_mccsmln_availability(cm, expected_status):
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
-            pytest.fail(
-                "Timeout occurred while checking the Mccs Master Leaf Node"
-                + " availability."
-            )
+            pytest.fail(TIMEOUT_AVAILABILITY)
 
 
 def export_device(db, db_info):
@@ -727,13 +716,13 @@ def check_lrcr_events(
         unique_id, result = assertion_data["attribute_value"]
         info_string = json.loads(result_to_check)
         received_result = json.loads(result)
-        if unique_id.endswith(command_name):
-            if (
-                received_result[0] == info_string[0]
-                and info_string[1] in received_result[1]
-            ):
-                logger.debug("%s_UID: %s", command_name, unique_id)
-                flag = True
+        if (
+            unique_id.endswith(command_name)
+            and received_result[0] == info_string[0]
+            and info_string[1] in received_result[1]
+        ):
+            logger.debug("%s_UID: %s", command_name, unique_id)
+            flag = True
         count = count + 1
         time.sleep(1)
     if flag:
