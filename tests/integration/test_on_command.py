@@ -80,65 +80,6 @@ def test_on_command_mid(change_event_callbacks):
     telescope_off(central_node, change_event_callbacks)
 
 
-@pytest.mark.post_deployment
-@pytest.mark.SKA_mid
-@pytest.mark.parametrize(
-    "device_name",
-    [DISH_LEAF_NODE_1],
-)
-def test_on_command_dish_fail(
-    device_name,
-    change_event_callbacks,
-):
-    """Test TelescopeOn command failure on dish device"""
-    dev_factory = DevFactory()
-    central_node = dev_factory.get_device(CENTRALNODE_MID)
-
-    ensure_checked_devices(central_node)
-
-    tmc_dish = dev_factory.get_device(device_name)
-    dish_defect = json.loads(DISH_DEFECT)
-    dish_defect["error_message"] += device_name
-    dish_defect = json.dumps(dish_defect)
-    tmc_dish.SetDefective(dish_defect)
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-    result_on, unique_id = central_node.TelescopeOn()
-    assert result_on[0] == ResultCode.QUEUED
-    assert unique_id[0].endswith("TelescopeOn")
-
-    csp_master = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
-    csp_master.SetDirectState(tango.DevState.ON)
-
-    sdp_master = dev_factory.get_device(MID_SDP_MASTER_DEVICE)
-    sdp_master.SetDirectState(tango.DevState.ON)
-
-    # Refactored CommandExecutor formats dish failures as:
-    # "Error occurred for device <trl>: Unexpected result code
-    # for SetStandbyFPMode command: 3"
-    check_exception(
-        change_event_callbacks,
-        unique_id,
-        device_name,
-        f"Error occurred for device {device_name}",
-    )
-
-    for dish_ln in [DISH_LEAF_NODE_36, DISH_LEAF_NODE_63, DISH_LEAF_NODE_100]:
-        check_dish_mode_event(
-            dish_ln, DishMode.STANDBY_FP, change_event_callbacks
-        )
-
-    tmc_dish.SetDefective(RESET_DEFECT)
-
-    # Teardown
-    telescope_off(central_node, change_event_callbacks)
-
-    tmc_dish.ClearCommandCallInfo()
-
-
 # @pytest.mark.post_deployment
 # @pytest.mark.SKA_mid
 # @pytest.mark.parametrize(
@@ -175,11 +116,14 @@ def test_on_command_dish_fail(
 #     sdp_master = dev_factory.get_device(MID_SDP_MASTER_DEVICE)
 #     sdp_master.SetDirectState(tango.DevState.ON)
 
+#     # Refactored CommandExecutor formats dish failures as:
+#     # "Error occurred for device <trl>: Unexpected result code
+#     # for SetStandbyFPMode command: 3"
 #     check_exception(
 #         change_event_callbacks,
 #         unique_id,
 #         device_name,
-#         "Error in calling command for dish devices",
+#         f"Error occurred for device {device_name}",
 #     )
 
 #     for dish_ln in [DISH_LEAF_NODE_36, DISH_LEAF_NODE_63,
@@ -194,6 +138,62 @@ def test_on_command_dish_fail(
 #     telescope_off(central_node, change_event_callbacks)
 
 #     tmc_dish.ClearCommandCallInfo()
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+@pytest.mark.parametrize(
+    "device_name",
+    [DISH_LEAF_NODE_1],
+)
+def test_on_command_dish_fail(
+    device_name,
+    change_event_callbacks,
+):
+    """Test TelescopeOn command failure on dish device"""
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
+
+    ensure_checked_devices(central_node)
+
+    tmc_dish = dev_factory.get_device(device_name)
+    dish_defect = json.loads(DISH_DEFECT)
+    dish_defect["error_message"] += device_name
+    dish_defect = json.dumps(dish_defect)
+    tmc_dish.SetDefective(dish_defect)
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+    result_on, unique_id = central_node.TelescopeOn()
+    assert result_on[0] == ResultCode.QUEUED
+    assert unique_id[0].endswith("TelescopeOn")
+
+    csp_master = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
+    csp_master.SetDirectState(tango.DevState.ON)
+
+    sdp_master = dev_factory.get_device(MID_SDP_MASTER_DEVICE)
+    sdp_master.SetDirectState(tango.DevState.ON)
+
+    check_exception(
+        change_event_callbacks,
+        unique_id,
+        device_name,
+        "Error in calling command for dish devices",
+    )
+
+    for dish_ln in [DISH_LEAF_NODE_36, DISH_LEAF_NODE_63, DISH_LEAF_NODE_100]:
+        check_dish_mode_event(
+            dish_ln, DishMode.STANDBY_FP, change_event_callbacks
+        )
+
+    tmc_dish.SetDefective(RESET_DEFECT)
+
+    # Teardown
+    telescope_off(central_node, change_event_callbacks)
+
+    tmc_dish.ClearCommandCallInfo()
 
 
 @pytest.mark.post_deployment

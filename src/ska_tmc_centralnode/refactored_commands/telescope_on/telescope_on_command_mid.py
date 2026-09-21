@@ -8,6 +8,7 @@ from ska_tmc_common import AdapterFactory
 
 from .telescope_on_command import BaseTelescopeOnCN
 from .telescope_on_context import MidTelescopeOnContext
+from .telescope_on_executor import TelescopeOnExecutor
 
 
 class TelescopeOnMid(BaseTelescopeOnCN):
@@ -20,6 +21,11 @@ class TelescopeOnMid(BaseTelescopeOnCN):
         logger: logging.Logger,
     ) -> None:
         super().__init__(command_runtime_context, adapter_provider, logger)
+        # override the default executor
+        self.executor = TelescopeOnExecutor(
+            adapter_provider=adapter_provider,
+            logger=logger,
+        )
 
     def build_device_commands(self) -> None:
         """Build the ordered list of DeviceCommands for Mid."""
