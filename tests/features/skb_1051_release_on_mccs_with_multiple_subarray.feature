@@ -1,7 +1,8 @@
-@post_deployment @acceptance @SKA_low
-Scenario: Ability to assgin and release mutltiple subarray
-    Given a CentralNode Low device
-    And assigned two subarrays to the central node
-    When resources are released from both the subarrays
-    Then the command is executed successfully on both the subarrays
-    And the command is executed successfully on the mccs master leaf node twice
+Feature: Default
+    @post_deployment @acceptance @SKA_low
+    Scenario: Ability to assgin and release mutltiple subarray
+        Given a CentralNode Low device
+        And assigned two subarrays to the central node
+        When resources are released from both the subarrays
+        Then the command is executed successfully on both the subarrays
+        And the command is executed successfully on the mccs master leaf node twice
