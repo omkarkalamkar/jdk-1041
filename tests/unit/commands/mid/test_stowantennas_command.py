@@ -207,7 +207,7 @@ def test_set_stow_mode_to_dish():
     )
     set_stow_command.execute(argin=["ska001"], task_callback=MagicMock())
     set_stow_command.logger.error.assert_called_once_with(
-        "Dish is unreachable"
+        "ERROR: Dish is unreachable"
     )
     set_stow_command.logger = logger
     set_stow_command.command_runtime_context.get_current_dish_mode_of_dln = (
