@@ -13,6 +13,9 @@ from ska_tmc_simulators.cn_helper_subarray_device import CNHelperSubArrayDevice
 
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
+    DISH_LEAF_NODE_DEVICE_099,
+    DISH_LEAF_NODE_DEVICE_500,
+    DISH_LEAF_NODE_DEVICE_999,
     DISH_MASTER_DEVICE,
     MID_CSP_MASTER_DEVICE,
     MID_CSP_MLN_DEVICE,
@@ -53,6 +56,9 @@ def devices_to_load():
             "class": HelperDishLNDevice,
             "devices": [
                 {"name": DISH_LEAF_NODE_DEVICE},
+                {"name": DISH_LEAF_NODE_DEVICE_099},
+                {"name": DISH_LEAF_NODE_DEVICE_500},
+                {"name": DISH_LEAF_NODE_DEVICE_999},
             ],
         },
         {
@@ -104,7 +110,14 @@ def set_device_standby(devFactory, cm, expected_elapsed_time):
     """Sets device to standby"""
     set_device_state(MID_CSP_MASTER_DEVICE, tango.DevState.STANDBY, devFactory)
     set_device_state(MID_SDP_MASTER_DEVICE, tango.DevState.ON, devFactory)
-    set_dish_mode(DISH_MASTER_DEVICE, DishMode.STANDBY_LP, devFactory)
+    set_dish_mode(DISH_LEAF_NODE_DEVICE, DishMode.STANDBY_FP, devFactory)
+    set_dish_mode(DISH_LEAF_NODE_DEVICE_099, DishMode.STANDBY_FP, devFactory)
+    set_dish_mode(DISH_LEAF_NODE_DEVICE_500, DishMode.STANDBY_FP, devFactory)
+    set_dish_mode(DISH_LEAF_NODE_DEVICE_999, DishMode.STANDBY_FP, devFactory)
+    set_dish_mode(DISH_LEAF_NODE_DEVICE, DishMode.STANDBY_LP, devFactory)
+    set_dish_mode(DISH_LEAF_NODE_DEVICE_099, DishMode.STANDBY_LP, devFactory)
+    set_dish_mode(DISH_LEAF_NODE_DEVICE_500, DishMode.STANDBY_LP, devFactory)
+    set_dish_mode(DISH_LEAF_NODE_DEVICE_999, DishMode.STANDBY_LP, devFactory)
     ensure_telescope_state(cm, tango.DevState.STANDBY, expected_elapsed_time)
 
 

@@ -26,7 +26,7 @@ from ska_tmc_common.v4.exceptions.exceptions import (
 from ..common.base_command import BaseCNCommand
 from .contexts import StowContext
 
-DISH_UNREACHABLE = "Dish is unreachable"
+DISH_UNREACHABLE = "ERROR: Dish is unreachable"
 
 
 class SetStowExecutor(CommandExecutor):
