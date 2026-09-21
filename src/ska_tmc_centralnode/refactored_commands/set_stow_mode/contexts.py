@@ -18,7 +18,6 @@ class StowContext(CommandRuntimeContext):
     cmd_inprogress_ctx: CommandInProgressContext
     update_abort_evt: Callback to update the abort event.
     get_dish_leaf_node_device_names: Callback to get dish device names.
-    get_device: Callback to retrieve a device.
     dish_leaf_node_prefix: Prefix used for dish leaf node devices.
     """
 
