@@ -316,19 +316,9 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
         """
         return self.stow_mode_command_aggregated_result
 
-    # def get_dish_devices(self) -> Dict[str, Any]:
-    #     """Return mapping of dish leaf-node name →
-    #     DeviceInfo (with dishMode)."""
-    #     result = {}
-    #     for name in self.get_dish_leaf_node_device_names():
-    #         info = self.get_device(name)
-    #         if info is not None:
-    #             result[name] = info
-    #     return result
-
-    def get_subarray_device_names(self) -> List[str]:
-        """Return list of Subarray device names."""
-        return list(self.input_parameter.subarray_dev_names)
+    # def get_subarray_device_names(self) -> List[str]:
+    #     """Return list of Subarray device names."""
+    #     return list(self.input_parameter.subarray_dev_names)
 
     @property
     def dish_vcc_command_status(self) -> DishConfigStatus:

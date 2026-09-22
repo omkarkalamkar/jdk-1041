@@ -9,7 +9,7 @@ package.
 
 import json
 from collections import defaultdict
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Callable, Dict, Tuple, Union
 
 from ska_schemas.schema import validate
 from ska_tango_base.base import TaskCallbackType
@@ -166,9 +166,9 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
         )
         return event_handlers
 
-    def get_subarray_device_names(self) -> List[str]:
-        """Return list of Subarray device names."""
-        return list(self.input_parameter.subarray_dev_names)
+    # def get_subarray_device_names(self) -> List[str]:
+    #     """Return list of Subarray device names."""
+    #     return list(self.input_parameter.subarray_dev_names)
 
     @property
     def assign_resources_schema_version(self) -> str:

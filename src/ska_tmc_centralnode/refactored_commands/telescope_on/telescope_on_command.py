@@ -55,15 +55,15 @@ class BaseTelescopeOnCN(BaseCNCommand):
         self._plan = strategy.build_plan(self.command_runtime_context)
         self.unavailable_devices = list(self._plan.unavailable_devices)
 
-    def is_state_complete(self) -> bool:
-        """TelescopeOn completion check.
+    # def is_state_complete(self) -> bool:
+    #     """TelescopeOn completion check.
 
-        Override in subclasses if a more precise check against
-        telescopeState / aggregators is required.
-        """
-        # Default: rely on event-driven completion from BaseTMCCommand.
-        # Adjust according to your aggregator logic if needed.
-        return True
+    #     Override in subclasses if a more precise check against
+    #     telescopeState / aggregators is required.
+    #     """
+    #     # Default: rely on event-driven completion from BaseTMCCommand.
+    #     # Adjust according to your aggregator logic if needed.
+    #     return True
 
     def update_task_status(self, **kwargs) -> None:
         """Update LRC status; preserve unavailable-device messaging."""
