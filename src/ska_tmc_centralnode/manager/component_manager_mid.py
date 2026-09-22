@@ -316,10 +316,6 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
         """
         return self.stow_mode_command_aggregated_result
 
-    # def get_subarray_device_names(self) -> List[str]:
-    #     """Return list of Subarray device names."""
-    #     return list(self.input_parameter.subarray_dev_names)
-
     @property
     def dish_vcc_command_status(self) -> DishConfigStatus:
         """Return dish vcc command status"""
@@ -982,7 +978,6 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
             get_dish_devices=self.get_dish_devices,
         )
 
-    # @exception_handler(command_name="TelescopeOn")
     def telescope_on(
         self,
         task_callback: TaskCallbackType,

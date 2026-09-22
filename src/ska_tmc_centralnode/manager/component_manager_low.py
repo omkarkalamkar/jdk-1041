@@ -166,10 +166,6 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
         )
         return event_handlers
 
-    # def get_subarray_device_names(self) -> List[str]:
-    #     """Return list of Subarray device names."""
-    #     return list(self.input_parameter.subarray_dev_names)
-
     @property
     def assign_resources_schema_version(self) -> str:
         """
@@ -361,7 +357,6 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
             check_if_mccs_mln_is_available=self.check_if_mccs_mln_is_available,
         )
 
-    # @exception_handler(command_name="TelescopeOn")
     def telescope_on(
         self,
         task_callback: TaskCallbackType,
