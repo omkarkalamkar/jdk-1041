@@ -14,8 +14,6 @@ from ska_tmc_common import AdapterFactory
 from ska_tmc_common.v4.command_context import CommandRuntimeContext
 from ska_tmc_common.v4.tmc_command import BaseTMCCommand
 
-from ..assignresources.assign_resources_context import AssignResourcesContext
-
 LOGGER = logging.getLogger(__name__)
 ADAPTER_INIT_ERROR = "Exception in creating adapter for %s, Exception: %s"
 
@@ -25,14 +23,14 @@ class BaseCNCommand(BaseTMCCommand):
 
     def __init__(
         self,
-        command_runtime_context: AssignResourcesContext,
+        command_runtime_context: CommandRuntimeContext,
         adapter_provider: AdapterFactory,
         logger: logging.Logger,
     ) -> None:
         """Initializes the BaseCNCommand class.
-        :param command_runtime_context: AssignResources command context
-            to manage data from assign resources json.
-        :type command_runtime_context: AssignResourcesContext
+        :param command_runtime_context: Command context
+            to manage data from commands.
+        :type command_runtime_context: CommandRuntimeContext
         :param adapter_provider: Instance of adapter factory to fetch
             requried adapters.
         :type adapter_provider: AdapterFactory

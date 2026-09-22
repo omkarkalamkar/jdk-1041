@@ -13,6 +13,9 @@ from ska_tmc_simulators.cn_helper_subarray_device import CNHelperSubArrayDevice
 
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
+    DISH_LEAF_NODE_DEVICE_099,
+    DISH_LEAF_NODE_DEVICE_500,
+    DISH_LEAF_NODE_DEVICE_999,
     DISH_MASTER_DEVICE,
     MID_CSP_MASTER_DEVICE,
     MID_CSP_MLN_DEVICE,
@@ -52,6 +55,9 @@ def devices_to_load():
             "class": HelperDishLNDevice,
             "devices": [
                 {"name": DISH_LEAF_NODE_DEVICE},
+                {"name": DISH_LEAF_NODE_DEVICE_099},
+                {"name": DISH_LEAF_NODE_DEVICE_500},
+                {"name": DISH_LEAF_NODE_DEVICE_999},
             ],
         },
         {
@@ -73,9 +79,14 @@ def test_telescope_state_off_with_dishmode_standbylp(tango_context):
         state=tango.DevState.OFF,
         dev_factory=DevFactory(),
     )
-
-    dish_master = DevFactory().get_device(DISH_MASTER_DEVICE)
-    dish_master.SetDirectDishMode(DishMode.STANDBY_LP)
+    for dish in [
+        DISH_LEAF_NODE_DEVICE,
+        DISH_LEAF_NODE_DEVICE_099,
+        DISH_LEAF_NODE_DEVICE_500,
+        DISH_LEAF_NODE_DEVICE_999,
+    ]:
+        dish_master = DevFactory().get_device(dish)
+        dish_master.SetDirectDishMode(DishMode.STANDBY_LP)
     # Here expected elapsed time is set to 12 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
     ensure_telescope_state(cm, tango.DevState.OFF, expected_elapsed_time=30)
     assert cm.component.telescope_state == tango.DevState.OFF
@@ -92,8 +103,14 @@ def test_telescope_state_off_with_dishmode_shutdown(tango_context):
         dev_factory=DevFactory(),
     )
 
-    dish_master = DevFactory().get_device(DISH_MASTER_DEVICE)
-    dish_master.SetDirectDishMode(DishMode.SHUTDOWN)
+    for dish in [
+        DISH_LEAF_NODE_DEVICE,
+        DISH_LEAF_NODE_DEVICE_099,
+        DISH_LEAF_NODE_DEVICE_500,
+        DISH_LEAF_NODE_DEVICE_999,
+    ]:
+        dish_master = DevFactory().get_device(dish)
+        dish_master.SetDirectDishMode(DishMode.SHUTDOWN)
     # Here expected elapsed time is set to 12 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
     ensure_telescope_state(cm, tango.DevState.OFF, expected_elapsed_time=30)
     assert cm.component.telescope_state == tango.DevState.OFF

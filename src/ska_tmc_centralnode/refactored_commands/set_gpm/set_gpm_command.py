@@ -33,12 +33,12 @@ class SetGlobalPointingModel(BaseTMCCommand):
 
     DISH_UNREACHABLE: ClassVar[str] = "Dish is unreachable"
     GPM_INVALID_INPUT: ClassVar[str] = "GPM input argument is required"
-    GPM_NO_FILE_FOUND: ClassVar[
-        str
-    ] = "No GPM files found on set GPM parameters."
-    SOURCE_FILEPATH_MISSING: ClassVar[
-        str
-    ] = "tm_data_sources and tm_data_filepath not provided in json"
+    GPM_NO_FILE_FOUND: ClassVar[str] = (
+        "No GPM files found on set GPM parameters."
+    )
+    SOURCE_FILEPATH_MISSING: ClassVar[str] = (
+        "tm_data_sources and tm_data_filepath not provided in json"
+    )
 
     def __init__(
         self,

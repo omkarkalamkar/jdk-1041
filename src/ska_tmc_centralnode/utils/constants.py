@@ -1,4 +1,5 @@
 """Common constant used in centralnode"""
+
 from ska_control_model.result_code import ResultCode
 
 MID_CSP_MLN_DEVICE = "mid-tmc/leaf-node-csp/0"
@@ -6,7 +7,7 @@ LOW_CSP_MLN_DEVICE = "low-tmc/leaf-node-csp/0"
 MID_SDP_MLN_DEVICE = "mid-tmc/leaf-node-sdp/0"
 LOW_SDP_MLN_DEVICE = "low-tmc/leaf-node-sdp/0"
 MCCS_MLN_DEVICE = "low-tmc/leaf-node-mccs/0"
-DISH_LEAF_NODE_PREFIX = "mid-tmc/leaf-node-dish/ska"
+DISH_LEAF_NODE_PREFIX = "mid-tmc/leaf-node-dish"
 DISH_LEAF_NODE_1 = "mid-tmc/leaf-node-dish/ska001"
 DISH_LEAF_NODE_36 = "mid-tmc/leaf-node-dish/ska036"
 DISH_LEAF_NODE_63 = "mid-tmc/leaf-node-dish/ska063"

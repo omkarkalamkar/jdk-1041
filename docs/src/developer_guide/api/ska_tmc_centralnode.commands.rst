@@ -43,13 +43,6 @@ ska\_tmc\_centralnode.refactored_commands.releaseresources.release\_resources\_c
    :undoc-members:
    :show-inheritance:
 
-ska\_tmc\_centralnode.commands.stow\_antennas\_command module
--------------------------------------------------------------
-
-.. automodule:: ska_tmc_centralnode.commands.stow_antennas_command
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 ska\_tmc\_centralnode.commands.telescope\_off\_command module
 -------------------------------------------------------------
@@ -61,12 +54,12 @@ ska\_tmc\_centralnode.commands.telescope\_off\_command module
    :undoc-members:
    :show-inheritance:
 
-ska\_tmc\_centralnode.commands.telescope\_on\_command module
-------------------------------------------------------------
+ska\_tmc\_centralnode.refactored\_commands.telescope\_on module
+---------------------------------------------------------------
 
 .. _telescope_on:
 
-.. automodule:: ska_tmc_centralnode.commands.telescope_on_command
+.. automodule:: ska_tmc_centralnode.refactored_commands.telescope_on
    :members:
    :undoc-members:
    :show-inheritance:
@@ -85,6 +78,14 @@ ska\_tmc\_centralnode.refactored_commands.set\_gpm.set\_gpm\_command module
 ---------------------------------------------------------------------------
 
 .. automodule:: ska_tmc_centralnode.refactored_commands.set_gpm.set_gpm_command
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ska\_tmc\_centralnode.refactored_commands.set\_stow_mode.set\_stow\_command module
+-----------------------------------------------------------------------------------
+
+.. automodule:: ska_tmc_centralnode.refactored_commands.set_stow_mode.set_stow_command
    :members:
    :undoc-members:
    :show-inheritance:

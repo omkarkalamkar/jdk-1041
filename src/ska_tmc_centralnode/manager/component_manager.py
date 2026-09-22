@@ -36,6 +36,7 @@ from ska_tmc_common import (
     DeviceInfo,
     InvalidJSONError,
     SubArrayDeviceInfo,
+    SubarrayNotPresentError,
 )
 from ska_tmc_common.v2.tmc_component_manager import TmcComponentManager
 from tango.utils import PyTangoThread
@@ -86,9 +87,9 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
     the TMC and telescope state aggregation
     """
 
-    COMMAND_NOT_IMPLEMENTED: ClassVar[
-        str
-    ] = "Command is not Implemented in Central Node."
+    COMMAND_NOT_IMPLEMENTED: ClassVar[str] = (
+        "Command is not Implemented in Central Node."
+    )
     _array_layout_url: Signal = Signal[dict](stored=True)
     _default_array_layout_url: Signal = Signal[dict](stored=True)
 
@@ -806,7 +807,9 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
         telescope_availability = self.get_telescope_availability()
         subarray_availability = telescope_availability.get(subarray)
         if subarray_availability is False:
-            raise Exception(f"Subarray {subarray} is not available.")
+            raise SubarrayNotPresentError(
+                f"Subarray {subarray} is not available."
+            )
 
     def is_command_allowed(self, command_name: str = "") -> bool:
         """Check whether the given command is allowed

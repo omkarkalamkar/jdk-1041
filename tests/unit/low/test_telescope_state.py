@@ -62,49 +62,53 @@ def devices_to_load():
     )
 
 
-def set_device_init(devFactory, cm, expected_elapsed_time):
-    set_device_state(LOW_SDP_MASTER_DEVICE, tango.DevState.INIT, devFactory)
-    set_device_state(LOW_CSP_MASTER_DEVICE, tango.DevState.INIT, devFactory)
+def set_device_init(dev_factory, cm, expected_elapsed_time):
+    set_device_state(LOW_SDP_MASTER_DEVICE, tango.DevState.INIT, dev_factory)
+    set_device_state(LOW_CSP_MASTER_DEVICE, tango.DevState.INIT, dev_factory)
     ensure_telescope_state(cm, tango.DevState.INIT, expected_elapsed_time)
 
 
 @pytest.mark.SKA_low
 def test_telescope_state_init(tango_context):
-    devFactory = DevFactory()
+    dev_factory = DevFactory()
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
-    set_device_init(devFactory, cm, 30)
+    set_device_init(dev_factory, cm, 30)
     assert cm.component.telescope_state == tango.DevState.INIT
 
 
-def set_one_device_fault(devFactory, cm, expected_elapsed_time):
-    set_device_state(LOW_SDP_MASTER_DEVICE, tango.DevState.FAULT, devFactory)
+def set_one_device_fault(dev_factory, cm, expected_elapsed_time):
+    set_device_state(LOW_SDP_MASTER_DEVICE, tango.DevState.FAULT, dev_factory)
     ensure_telescope_state(cm, tango.DevState.FAULT, expected_elapsed_time)
 
 
 @pytest.mark.skip(reason="TODO")
 @pytest.mark.SKA_low
 def test_telescope_state_fault_over_standby(tango_context):
-    devFactory = DevFactory()
+    dev_factory = DevFactory()
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
-    set_one_device_fault(devFactory, cm, 40)
+    set_one_device_fault(dev_factory, cm, 40)
     assert cm.component.telescope_state == tango.DevState.FAULT
 
 
-def set_device_standby(devFactory, cm, expected_elapsed_time):
-    set_device_state(LOW_SDP_MASTER_DEVICE, tango.DevState.STANDBY, devFactory)
-    set_device_state(LOW_CSP_MASTER_DEVICE, tango.DevState.STANDBY, devFactory)
+def set_device_standby(dev_factory, cm, expected_elapsed_time):
+    set_device_state(
+        LOW_SDP_MASTER_DEVICE, tango.DevState.STANDBY, dev_factory
+    )
+    set_device_state(
+        LOW_CSP_MASTER_DEVICE, tango.DevState.STANDBY, dev_factory
+    )
     ensure_telescope_state(cm, tango.DevState.STANDBY, expected_elapsed_time)
 
 
 @pytest.mark.SKA_low
 def test_telescope_state_standby(tango_context):
-    devFactory = DevFactory()
+    dev_factory = DevFactory()
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
-    set_device_standby(devFactory, cm, 40)
+    set_device_standby(dev_factory, cm, 40)
     assert cm.component.telescope_state == tango.DevState.STANDBY

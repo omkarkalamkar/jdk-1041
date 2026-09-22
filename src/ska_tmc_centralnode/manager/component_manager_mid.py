@@ -6,11 +6,12 @@ It is component Manager for Mid Telecope.
 It is provided for explanatory purposes, and to support testing of this
 package.
 """
+
 import copy
 import json
 import threading
 import time
-from typing import Any, Callable, Dict, List, Tuple, Union, cast
+from typing import Any, Dict, List, Tuple, Union, cast
 
 from ska_control_model import TaskStatus
 from ska_tango_base.base import TaskCallbackType
@@ -25,7 +26,6 @@ from ska_tmc_common import (
 from ska_tmc_common.enum import DishMode
 from tango import DevState
 
-from ska_tmc_centralnode.commands.stow_antennas_command import SetStowMode
 from ska_tmc_centralnode.input_validator import (
     AssignResourceValidator,
     ReleaseResourceValidator,
@@ -70,12 +70,22 @@ from ska_tmc_centralnode.refactored_commands.set_gpm.contexts import GPMContext
 from ska_tmc_centralnode.refactored_commands.set_gpm.set_gpm_command import (
     SetGlobalPointingModel,
 )
+
+# pylint:enable=line-too-long
+from ska_tmc_centralnode.refactored_commands.set_stow_mode.contexts import (
+    StowContext,
+)
+
+# pylint:disable=line-too-long
+from ska_tmc_centralnode.refactored_commands.set_stow_mode.set_stow_command import (
+    SetStowMode,
+)
+
+# pylint:enable=line-too-long
 from ska_tmc_centralnode.refactored_commands.telescope_on import (
     MidTelescopeOnContext,
     TelescopeOnMid,
 )
-
-# pylint:enable=line-too-long
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_MID,
     DISH_VCC_CONFIG_INTERFACE_VERSION,
@@ -147,13 +157,6 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
         self.number_of_gpm_executed = 0
         self.gpm_unknown_dishes: List[str] = []
         self.is_gpm_init = True
-        self.dishln_stow_mode_lock = threading.RLock()
-        self.number_of_stow_mode_executed: int = 0
-        self.stow_mode_command_aggregated_result: ResultCode = (
-            ResultCode.UNKNOWN
-        )
-        self.stow_mode_aggregated_result: bool = True
-        self.dishln_stow_mode_cmd_exe_data: dict = {}
         self.event_processor: MidEventProcessor = MidEventProcessor(
             stop_event=self._stop_thread,
             logger=config.logger,
@@ -305,16 +308,6 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
 
         """
         return self.gpm_version_aggregated_result
-
-    def get_set_stow_mode_resultcode(self) -> ResultCode:
-        """
-        Return Aggregated command result for Set Stow Mode command
-
-        Returns:
-            Aggregated command result(ResultCode) for Set Stow Mode command
-
-        """
-        return self.stow_mode_command_aggregated_result
 
     @property
     def dish_vcc_command_status(self) -> DishConfigStatus:
@@ -523,8 +516,8 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
         """
         result = []
         for dish in range(1, (num_dishes + 1)):
-            self.add_device(f"{dln_prefix}{dish:03d}")
-            result.append(f"{dln_prefix}{dish:03d}")
+            self.add_device(f"{dln_prefix}/ska{dish:03d}")
+            result.append(f"{dln_prefix}/ska{dish:03d}")
         return result
 
     def _aggregate_telescope_state(self) -> None:
@@ -716,8 +709,11 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
 
     # pylint: disable=unexpected-keyword-arg
     def load_dish_cfg(
-        self, argin: str, task_callback: Callable, task_abort_event
-    ) -> Tuple[ResultCode, str]:
+        self,
+        argin: str,
+        task_callback: TaskCallbackType,
+        task_abort_event: threading.Event,
+    ) -> None:
         """
         Load Dish Cfg command for Dish-VCC map.
 
@@ -742,10 +738,11 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
                     " loaddishcfg execution"
                 )
             self.update_dish_vcc_flag(False)
-            return task_callback(
+            task_callback(
                 status=TaskStatus.REJECTED,
                 result=(ResultCode.NOT_ALLOWED, err_msg),
             )
+            return
         loadishcfg_command_object = LoadDishCfg(
             self._get_load_dish_cfg_context(),
             adapter_factory=self.adapter_factory,
@@ -764,20 +761,24 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
                 CENTRALNODE_MID: "JsonDecodeError"
             }
             message = f"The JSON string is malformed. Error: {str(e)}"
-            return task_callback(
+            task_callback(
                 status=TaskStatus.REJECTED,
                 result=(ResultCode.NOT_ALLOWED, message),
             )
+            return
 
-        return loadishcfg_command_object.execute(
+        loadishcfg_command_object.execute(
             argin=argin,
             task_callback=task_callback,
             task_abort_event=task_abort_event,
         )
 
     def set_gpm_version(
-        self, argin: str, task_callback: Callable, task_abort_event
-    ) -> Tuple[ResultCode, str]:
+        self,
+        argin: str,
+        task_callback: TaskCallbackType,
+        task_abort_event: threading.Event,
+    ) -> None:
         """
         Set GPM version for Dish.
 
@@ -795,7 +796,7 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
             logger=self.logger,
         )
 
-        return set_gpm_version_command_object.execute(
+        set_gpm_version_command_object.execute(
             argin=argin,
             task_callback=task_callback,
             task_abort_event=task_abort_event,
@@ -830,9 +831,32 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
             reset_gpm_data=self.reset_gpm_data,
         )
 
+    def _get_stow_context(self) -> StowContext:
+        """Build StowContext bound to this component manager.
+
+        :return: Runtime context for SetStowMode command execution.
+        :rtype: StowContext
+        """
+        return StowContext(
+            command_completion_condition=self.command_completion_cond,
+            command_timeout=self.config.timeout_config.command_timeout,
+            cmd_inprogress_ctx=CommandInProgressContext(
+                update_name=lambda name: setattr(
+                    self, "command_in_progress", name
+                ),
+                clear=lambda _: setattr(self, "command_in_progress", ""),
+                get_name=lambda: self.command_in_progress,
+            ),
+            dish_leaf_node_prefix=self.input_parameter.dish_leaf_node_prefix,
+            get_current_dish_mode_of_dln=self.get_current_dish_mode_of_dln,
+        )
+
     def set_stow_mode(
-        self, argin: str, task_callback: Callable, task_abort_event
-    ) -> Tuple[ResultCode, str]:
+        self,
+        argin: str,
+        task_callback: TaskCallbackType,
+        task_abort_event: threading.Event,
+    ) -> None:
         """
         Set stow mode for given dishes.
 
@@ -845,7 +869,9 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
         """
 
         set_stow_mode_command_object = SetStowMode(
-            self, adapter_factory=self.adapter_factory, logger=self.logger
+            self._get_stow_context(),
+            adapter_provider=self.adapter_factory,
+            logger=self.logger,
         )
 
         try:
@@ -864,14 +890,14 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
             self.validate_dish_ids(stow_input)
             stow_input = [dish_id.lower() for dish_id in stow_input]
             self.logger.debug("Stow command dish list: %s", stow_input)
-            return set_stow_mode_command_object.apply_stow_mode(
+            set_stow_mode_command_object.execute(
                 argin=stow_input,
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
             )
         except Exception as exception:
             self.logger.exception("Exception occured %s", exception)
-            return task_callback(
+            task_callback(
                 status=TaskStatus.REJECTED,
                 result=(ResultCode.NOT_ALLOWED, str(exception)),
             )
@@ -898,14 +924,6 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
         self.gpm_unknown_dishes = []
         self.command_in_progress = ""
 
-    def reset_stow_mode_data(self) -> None:
-        """Reset StowMode data"""
-        self.logger.debug("Resetting SetStowMode data")
-        self.stow_mode_command_aggregated_result = ResultCode.UNKNOWN
-        self.number_of_stow_mode_executed = 0
-        self.dishln_stow_mode_cmd_exe_data = {}
-        self.command_in_progress = ""
-
     def get_current_dish_mode_of_dln(self, dish_id: str) -> DishMode:
         """
         Get the current dish mode of the specified dish leaf node.
@@ -919,12 +937,17 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
         """
         dish_leaf_node_dev_names = self.get_dish_leaf_node_device_names()
         dish_dev_name = ""
+        dish_mode = DishMode.UNKNOWN
         for dish in dish_leaf_node_dev_names:
             if dish_id in dish:
                 dish_dev_name = dish
                 break
-        dev_info = cast(DeviceInfo, self.component.get_device(dish_dev_name))
-        return cast(DishMode, dev_info.dish_mode)
+        if dish_dev_name:
+            dev_info = cast(
+                DishDeviceInfo, self.component.get_device(dish_dev_name)
+            )
+            dish_mode = cast(DishMode, dev_info.dish_mode)
+        return dish_mode
 
     def validate_assign_json(self, argin: str) -> Tuple[str, str]:
         """Validates assign resources json
@@ -1105,7 +1128,10 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
 
     @exception_handler(command_name="ReleaseResources")
     def release_resources(
-        self, argin: str, task_callback: TaskCallbackType, task_abort_event
+        self,
+        argin: str,
+        task_callback: TaskCallbackType,
+        task_abort_event: threading.Event,
     ) -> None:
         """
         Submit the ReleaseResource command in queue.

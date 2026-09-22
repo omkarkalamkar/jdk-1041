@@ -1,6 +1,5 @@
 """Test module for assign resources unavailability"""
 
-
 import time
 
 import pytest
@@ -69,7 +68,6 @@ def assign_resources(
         str(result),
     )
 
-    # assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
     assert_exception(
         unique_id,

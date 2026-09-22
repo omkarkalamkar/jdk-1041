@@ -260,6 +260,8 @@ def test_set_gpm_to_dish_exception_handling():
 def test_handle_gpm_version():
     cm, _ = create_cm()
     dish_id = "ska001"
+    dishln_name = f"mid-tmc/leaf-node-dish/{dish_id}"
+    cm.input_parameter.dish_leaf_node_dev_names = [dishln_name]
     cm.gpm_unknown_dishes = [dish_id]
     cm.command_in_progress = ""
     cm._dish_vcc_command_status = DishConfigStatus.COMPLETED
@@ -277,7 +279,7 @@ def test_handle_gpm_version():
     cm.command_in_progress = ""
     cm.is_gpm_init = False
     cm._event_cb_manager.handle_gpm_version_event(
-        dev_name=f"mid-tmc/leaf-node-dish/{dish_id}", gpm_version=gpm_version
+        dev_name=dishln_name, gpm_version=gpm_version
     )
     cm._event_cb_manager.gpm_invoke_command_callback.assert_called()
 

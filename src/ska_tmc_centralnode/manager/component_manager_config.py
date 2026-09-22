@@ -1,4 +1,5 @@
 """Configuration for Central Node component managers."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

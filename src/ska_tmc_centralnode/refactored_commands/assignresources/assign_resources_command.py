@@ -4,6 +4,7 @@ Mirrors BaseAssignResources for SubarrayNode: AssignResources-specific
 behaviour shared between the Mid and Low telescope commands
 (completion criteria, shared device-command construction).
 """
+
 import logging
 
 from ska_control_model import ObsState

@@ -1,4 +1,5 @@
 """Test module for command load dish cfg"""
+
 import json
 import threading
 from unittest.mock import MagicMock, patch
@@ -27,17 +28,19 @@ from ska_tmc_centralnode.utils.json_validator_decorator import (
 )
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
+    DISH_LEAF_NODE_DEVICE_099,
+    DISH_LEAF_NODE_DEVICE_500,
+    DISH_LEAF_NODE_DEVICE_999,
     MID_CSP_MLN_DEVICE,
     create_cm,
     logger,
     set_ldcfg_aggr_result,
 )
 
+
 # Helper Dish LN device is using Database API and in Unit test Database API
 # is not callable
 # Patch this particular method which mock return value from SetKValue command
-
-
 @patch.object(LoadDishCfg, "_execute_on_dish")
 def test_load_dish_cfg_command(
     execute_on_dish,
@@ -53,18 +56,40 @@ def test_load_dish_cfg_command(
     cm, _ = create_cm()
     cm.is_csp_mln_csp_master_ready = mock.MagicMock(return_value=ResultCode.OK)
     dln = tango.DeviceProxy("mid-tmc/leaf-node-dish/ska001")
+    dln2 = tango.DeviceProxy("mid-tmc/leaf-node-dish/ska500")
+    dln3 = tango.DeviceProxy("mid-tmc/leaf-node-dish/ska999")
+    dln4 = tango.DeviceProxy("mid-tmc/leaf-node-dish/ska099")
+
     execute_on_dish.return_value = ([ResultCode.QUEUED], [""])
     dln.SetDirectkValueValidationResult("0")
+    dln2.SetDirectkValueValidationResult("0")
+    dln3.SetDirectkValueValidationResult("0")
+    dln4.SetDirectkValueValidationResult("0")
+
     cm.is_dish_vcc_config_set = True
     dish_cfg_input_str = json_factory("command_load_dish_cfg")
     set_ldcfg_aggr_result(cm)
     with mock.patch.object(
         cm.dish_kvalue_validation_aggregator,
         "dln_kvalue_validation_results",
-        {"ska001": "k-value identical"},
+        {
+            "ska001": "k-value identical",
+            "ska500": "k-value identical",
+            "ska099": "k-value identical",
+            "ska999": "k-value identical",
+        },
     ):
         cm._event_cb_manager.update_k_value_validation(
             DISH_LEAF_NODE_DEVICE, ResultCode.OK
+        )
+        cm._event_cb_manager.update_k_value_validation(
+            DISH_LEAF_NODE_DEVICE_500, ResultCode.OK
+        )
+        cm._event_cb_manager.update_k_value_validation(
+            DISH_LEAF_NODE_DEVICE_999, ResultCode.OK
+        )
+        cm._event_cb_manager.update_k_value_validation(
+            DISH_LEAF_NODE_DEVICE_099, ResultCode.OK
         )
         cm.load_dish_cfg(
             dish_cfg_input_str,
@@ -257,7 +282,7 @@ def test_load_dish_cnfg_command_fail_csp_master(
     load_dish_cnfg_command = LoadDishCfg(
         cm._get_load_dish_cfg_context(), adapter_factory, logger=logger
     )
-    (res_code, _) = load_dish_cnfg_command.execute(
+    res_code, _ = load_dish_cnfg_command.execute(
         dish_cfg_input_str,
         task_callback=mock.Mock(),
         task_abort_event=mock.Mock(),

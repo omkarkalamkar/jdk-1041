@@ -1,4 +1,5 @@
 """Module for exception decorator"""
+
 import functools
 import threading
 
