@@ -1,5 +1,5 @@
-"""Module to maintain the GPM Json model.
-"""
+"""Module to maintain the GPM Json model."""
+
 import re
 from typing import Dict, List, Literal
 

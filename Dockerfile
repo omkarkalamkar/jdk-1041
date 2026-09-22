@@ -1,5 +1,5 @@
-ARG BUILD_IMAGE="artefact.skao.int/ska-build-python:0.3.2"
-ARG BASE_IMAGE="artefact.skao.int/ska-tango-images-tango-python:0.4.0"
+ARG BUILD_IMAGE="artefact.skao.int/ska-build-python:1.0.2"
+ARG BASE_IMAGE="artefact.skao.int/ska-tango-images-tango-python:0.5.1"
 FROM $BUILD_IMAGE AS buildenv
 
 FROM $BASE_IMAGE

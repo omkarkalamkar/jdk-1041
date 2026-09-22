@@ -153,7 +153,6 @@ def test_low_assign_resources_command_missing_subarray_beam_ids_key(
 def test_low_assign_resources_command_empty_input_json(
     tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
 ):
-    # import debugpy; debugpy.debug_this_thread()
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     decorated = assign_validate_json_args(cm.assign_resources)
 
@@ -188,7 +187,6 @@ def test_low_assign_resources_command_missing_aperture_id(
     json_factory,
     set_low_sdp_csp_mccs_admin_modes,
 ):
-    # import debugpy; debugpy.debug_this_thread()
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     assert cm.is_command_allowed("AssignResources")
     assign_input_str = json_factory("assign_resource_low")
@@ -211,7 +209,6 @@ def test_low_assign_resources_command_missing_station_ids(
     json_factory,
     set_low_sdp_csp_mccs_admin_modes,
 ):
-    # import debugpy; debugpy.debug_this_thread()
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
 
     assert cm.is_command_allowed("AssignResources")

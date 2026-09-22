@@ -27,7 +27,7 @@ from tests.settings import (
 
 def test_telescope_on_command(tango_context, set_mid_sdp_csp_admin_modes):
     """Test telescope On Command"""
-    # import debugpy; debugpy.debug_this_thread()
+
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
@@ -57,7 +57,6 @@ def test_telescope_on_command(tango_context, set_mid_sdp_csp_admin_modes):
 def test_telescope_on_command_unavailability(
     tango_context, set_mid_sdp_csp_admin_modes
 ):
-    # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
@@ -114,8 +113,8 @@ def test_telescope_on_command_fail_subarray(
     # include exception in TelescopeOn command
     failing_dev = MID_TMC_SUBARRAY
     attrs = {"TelescopeOn.side_effect": Exception}
-    subarrayMock = mock.Mock(**attrs)
-    my_adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
+    subarray_mock = mock.Mock(**attrs)
+    my_adapter_factory.get_or_create_adapter(failing_dev, proxy=subarray_mock)
     unique_id = f"{time.time()}_TelescopeOn"
     task_callback = MockCallable(unique_id)
 
@@ -181,7 +180,6 @@ def test_telescope_on_fail_check_allowed(
 def test_telescope_on_command_rejected(
     tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
-    # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
@@ -227,9 +225,9 @@ def test_telescope_on_command_fail_dish(
     failing_dev = DISH_LEAF_NODE_DEVICE
     err_msg = "Error in calling SetStandbyFPMode()"
     attrs = {"On.side_effect": Exception}
-    dishMasterLeafMock = mock.Mock(**attrs)
+    dish_master_mock = mock.Mock(**attrs)
     my_adapter_factory.get_or_create_adapter(
-        failing_dev, proxy=dishMasterLeafMock, adapter_type=AdapterType.DISH
+        failing_dev, proxy=dish_master_mock, adapter_type=AdapterType.DISH
     )
     unique_id = f"{time.time()}_TelescopeOn"
     task_callback = MockCallable(unique_id)

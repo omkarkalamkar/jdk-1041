@@ -1,6 +1,5 @@
 """Test case module"""
 
-
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_simulators.cn_helper_subarray_device import CNHelperSubArrayDevice

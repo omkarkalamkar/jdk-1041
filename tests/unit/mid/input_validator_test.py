@@ -2,6 +2,7 @@
 # flake8: noqa
 # standard python imports
 """This module is for validating input arguments"""
+
 import json
 
 import pytest
@@ -331,11 +332,11 @@ class TestAssignResourceValidator:
             self._test_receptor_id_list,
         )
 
-        with pytest.raises(InvalidJSONError) as excinfo:
+        with pytest.raises(InvalidJSONError):
             input_validator.loads(json.dumps(input_json))
 
         input_json["subarray_id"] = 15
-        with pytest.raises(SubarrayNotPresentError) as excinfo:
+        with pytest.raises(SubarrayNotPresentError):
             input_validator.loads(json.dumps(input_json))
 
     def test_validate_incorrect_receptor_id_length(self):
@@ -352,7 +353,7 @@ class TestAssignResourceValidator:
             self._test_subarray_list,
             self._test_receptor_id_list,
         )
-        with pytest.raises(InvalidReceptorIdError) as excinfo:
+        with pytest.raises(InvalidReceptorIdError):
             input_validator.loads(json.dumps(input_json))
 
     def test_validate_receptor_ids_with_no_digits(self):
@@ -370,7 +371,7 @@ class TestAssignResourceValidator:
             self._test_receptor_id_list,
         )
 
-        with pytest.raises(InvalidReceptorIdError) as excinfo:
+        with pytest.raises(InvalidReceptorIdError):
             input_validator.loads(json.dumps(input_json))
 
     def test_validate_receptor_ids_with_incorrect_prefix(self):
@@ -388,7 +389,7 @@ class TestAssignResourceValidator:
             self._test_receptor_id_list,
         )
 
-        with pytest.raises(InvalidReceptorIdError) as excinfo:
+        with pytest.raises(InvalidReceptorIdError):
             input_validator.loads(json.dumps(input_json))
 
     def test_validate_receptor_ids_with_incorrect_ska_dish_id(self):
@@ -406,7 +407,7 @@ class TestAssignResourceValidator:
             self._test_receptor_id_list,
         )
 
-        with pytest.raises(InvalidReceptorIdError) as excinfo:
+        with pytest.raises(InvalidReceptorIdError):
             input_validator.loads(json.dumps(input_json))
 
     def test_validate_receptor_ids_with_incorrect_mkt_dish_id(self):
@@ -424,7 +425,7 @@ class TestAssignResourceValidator:
             self._test_receptor_id_list,
         )
 
-        with pytest.raises(InvalidReceptorIdError) as excinfo:
+        with pytest.raises(InvalidReceptorIdError):
             input_validator.loads(json.dumps(input_json))
 
     def test_validate_receptor_not_present(self):
@@ -442,5 +443,5 @@ class TestAssignResourceValidator:
             self._test_receptor_id_list,
         )
 
-        with pytest.raises(ResourceNotPresentError) as excinfo:
+        with pytest.raises(ResourceNotPresentError):
             input_validator.loads(json.dumps(input_json))

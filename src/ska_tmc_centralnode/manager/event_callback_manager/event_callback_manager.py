@@ -1,5 +1,5 @@
-"""Module to manage all the event callbacks.
-"""
+"""Module to manage all the event callbacks."""
+
 from __future__ import annotations
 
 import threading

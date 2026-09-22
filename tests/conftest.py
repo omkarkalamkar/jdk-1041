@@ -128,9 +128,7 @@ def devices_to_load():
         },
         {
             "class": HelperDishLNDevice,
-            "devices": [
-                {"name": DISH_LEAF_NODE_DEVICE},
-            ],
+            "devices": [{"name": DISH_LEAF_NODE_DEVICE}],
         },
     )
 
