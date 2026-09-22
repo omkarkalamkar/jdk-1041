@@ -11,7 +11,7 @@ import copy
 import json
 import threading
 import time
-from typing import Callable, Dict, List, Tuple, Union, cast
+from typing import Dict, List, Tuple, Union, cast
 
 from ska_control_model import TaskStatus
 from ska_tango_base.base import TaskCallbackType
@@ -76,8 +76,6 @@ from ska_tmc_centralnode.refactored_commands.set_stow_mode.contexts import (
 from ska_tmc_centralnode.refactored_commands.set_stow_mode.set_stow_command import (
     SetStowMode,
 )
-
-# pylint:enable=line-too-long
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_MID,
     DISH_VCC_CONFIG_INTERFACE_VERSION,
@@ -701,8 +699,11 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
 
     # pylint: disable=unexpected-keyword-arg
     def load_dish_cfg(
-        self, argin: str, task_callback: Callable, task_abort_event
-    ) -> Tuple[ResultCode, str]:
+        self,
+        argin: str,
+        task_callback: TaskCallbackType,
+        task_abort_event: threading.Event,
+    ) -> None:
         """
         Load Dish Cfg command for Dish-VCC map.
 
@@ -727,10 +728,11 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
                     " loaddishcfg execution"
                 )
             self.update_dish_vcc_flag(False)
-            return task_callback(
+            task_callback(
                 status=TaskStatus.REJECTED,
                 result=(ResultCode.NOT_ALLOWED, err_msg),
             )
+            return
         loadishcfg_command_object = LoadDishCfg(
             self._get_load_dish_cfg_context(),
             adapter_factory=self.adapter_factory,
@@ -749,20 +751,24 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
                 CENTRALNODE_MID: "JsonDecodeError"
             }
             message = f"The JSON string is malformed. Error: {str(e)}"
-            return task_callback(
+            task_callback(
                 status=TaskStatus.REJECTED,
                 result=(ResultCode.NOT_ALLOWED, message),
             )
+            return
 
-        return loadishcfg_command_object.execute(
+        loadishcfg_command_object.execute(
             argin=argin,
             task_callback=task_callback,
             task_abort_event=task_abort_event,
         )
 
     def set_gpm_version(
-        self, argin: str, task_callback: Callable, task_abort_event
-    ) -> Tuple[ResultCode, str]:
+        self,
+        argin: str,
+        task_callback: TaskCallbackType,
+        task_abort_event: threading.Event,
+    ) -> None:
         """
         Set GPM version for Dish.
 
@@ -780,7 +786,7 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
             logger=self.logger,
         )
 
-        return set_gpm_version_command_object.execute(
+        set_gpm_version_command_object.execute(
             argin=argin,
             task_callback=task_callback,
             task_abort_event=task_abort_event,
@@ -831,13 +837,15 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
                 clear=lambda _: setattr(self, "command_in_progress", ""),
                 get_name=lambda: self.command_in_progress,
             ),
-            update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
             dish_leaf_node_prefix=self.input_parameter.dish_leaf_node_prefix,
             get_current_dish_mode_of_dln=self.get_current_dish_mode_of_dln,
         )
 
     def set_stow_mode(
-        self, argin: str, task_callback: Callable, task_abort_event
+        self,
+        argin: str,
+        task_callback: TaskCallbackType,
+        task_abort_event: threading.Event,
     ) -> None:
         """
         Set stow mode for given dishes.
@@ -1077,7 +1085,10 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
 
     @exception_handler(command_name="ReleaseResources")
     def release_resources(
-        self, argin: str, task_callback: TaskCallbackType, task_abort_event
+        self,
+        argin: str,
+        task_callback: TaskCallbackType,
+        task_abort_event: threading.Event,
     ) -> None:
         """
         Submit the ReleaseResource command in queue.

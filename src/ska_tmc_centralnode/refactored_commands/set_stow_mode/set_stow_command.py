@@ -53,6 +53,7 @@ class SetStowExecutor(CommandExecutor):
                 self._invoke_command(adapter, command, context)
                 executed = executed + 1
             except (CommandRejectedError, CommandInvocationError) as err:
+
                 context.command_invoked_callback(command, True, err)
             except Exception:
                 context.command_invoked_callback(command, True)
@@ -135,9 +136,6 @@ class SetStowMode(BaseCNCommand):
             )
         self.context.command_invoked_callback = self.command_invoked_callback
         self.command_runtime_context.update_cmd_name(self.__class__.__name__)
-        self.command_runtime_context.update_abort_evt(
-            self.context.task_abort_event
-        )
 
     def get_dish_ln_name(self, dish_id: str) -> str:
         """Returns full FQDN of dishln."""
