@@ -69,6 +69,8 @@ class TelescopeOffLow(BaseTelescopeOffCN):
             )
             return
 
+        self.build_device_commands()
+
         # Phase 1: Execute subarray Off commands
         if self.context.device_commands:
             self.executor.execute(self.context)
