@@ -116,9 +116,12 @@ def test_telescope_off_command_fail_subarray(
 
     # include exception in TelescopeOff command for subarray
     failing_dev = MID_TMC_SUBARRAY
-    attrs = {"Off.side_effect": Exception("Subarray Off failed")}
-    subarray_mock = mock.Mock(**attrs)
-    my_adapter_factory.get_or_create_adapter(failing_dev, proxy=subarray_mock)
+    subarray_adapter = my_adapter_factory.get_or_create_adapter(
+        failing_dev, adapter_type=AdapterType.SUBARRAY
+    )
+    subarray_adapter.invoke_command = mock.Mock(
+        side_effect=Exception("Subarray Off failed")
+    )
     
     unique_id = f"{time.time()}_TelescopeOff"
     task_callback = MockCallable(unique_id)
