@@ -11,6 +11,9 @@ from ska_tmc_common.test_helpers.helper_adapter_factory import (
 )
 
 from ska_tmc_centralnode.model.input import InputParameterLow
+from ska_tmc_centralnode.refactored_commands.telescope_off import (
+    TelescopeOffLow,
+)
 from ska_tmc_centralnode.utils.constants import LOW_TMC_SUBARRAY
 from tests.mock_callable import MockCallable
 from tests.settings import (
@@ -29,6 +32,7 @@ from tests.settings import (
 def test_low_telescope_off_command(
     tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
 ):
+    """Test telescope Off command for Low (happy path via CM)."""
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
     logger.info(
@@ -37,18 +41,23 @@ def test_low_telescope_off_command(
     dev_factory = DevFactory()
     csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
     sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
+    mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
+
     csp_mln.SetSubsystemAvailable(True)
     sdp_mln.SetSubsystemAvailable(True)
+    mccs_mln.SetSubsystemAvailable(True)
+
     check_cspmln_availability(cm, True)
     check_sdpmln_availability(cm, True)
-    assert (cm.component.telescope_availability)[
-        "csp_master_leaf_node"
-    ] is True
-    assert (cm.component.telescope_availability)[
-        "sdp_master_leaf_node"
-    ] is True
+    check_mccsmln_availability(cm, True)
+
+    assert cm.component.telescope_availability["csp_master_leaf_node"] is True
+    assert cm.component.telescope_availability["sdp_master_leaf_node"] is True
+    assert cm.component.telescope_availability["mccs_master_leaf_node"] is True
+
     cm.is_command_allowed("TelescopeOff")
     cm.telescope_off(task_callback=task_callback)
+
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
@@ -56,7 +65,9 @@ def test_low_telescope_off_command(
         call_kwargs={
             "status": TaskStatus.COMPLETED,
             "result": (ResultCode.OK, "Command Completed"),
-        }
+        },
+        lookahead=5,
+        consume_nonmatches=True,
     )
 
 
@@ -64,6 +75,7 @@ def test_low_telescope_off_command(
 def test_telescope_off_command_unavailability(
     tango_context, set_low_sdp_csp_mccs_admin_modes
 ):
+    """Test telescope Off with unavailable subsystems returns OK."""
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
     logger.info(
@@ -90,9 +102,9 @@ def test_telescope_off_command_unavailability(
     assert (cm.component.telescope_availability)[
         "mccs_master_leaf_node"
     ] is False
-    cm.is_command_allowed("TelescopeOn")
+    cm.is_command_allowed("TelescopeOff")
 
-    cm.telescope_on(task_callback=task_callback)
+    cm.telescope_off(task_callback=task_callback)
     time.sleep(1)
     assert task_callback.result[0] == ResultCode.OK
 
@@ -101,6 +113,7 @@ def test_telescope_off_command_unavailability(
 def test_telescope_off_command_fail_subarray(
     tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
 ):
+    """Test telescope Off fails when subarray adapter raises exception."""
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
     logger.info(
@@ -129,7 +142,17 @@ def test_telescope_off_command_fail_subarray(
     adapter_factory.get_or_create_adapter(failing_dev, proxy=subarray_mock)
     cm.adapter_factory = adapter_factory
 
-    cm.telescope_off(task_callback=task_callback)
+    off_command = TelescopeOffLow(
+        command_runtime_context=cm._get_telescope_off_context(),
+        adapter_provider=adapter_factory,
+        logger=logger,
+    )
+    off_command.execute(
+        argin=None,
+        task_callback=task_callback,
+        task_abort_event=None,
+    )
+
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
@@ -143,6 +166,7 @@ def test_telescope_off_command_fail_subarray(
 def test_low_telescope_off_fail_check_allowed(
     tango_context, set_low_sdp_csp_mccs_admin_modes
 ):
+    """Test telescope Off command not allowed in fault state."""
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
     logger.info(
@@ -160,6 +184,7 @@ def test_low_telescope_off_fail_check_allowed(
 def test_telescope_off_command_rejected(
     tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
 ):
+    """Test telescope Off rejected when MCCS device is unresponsive."""
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
     logger.info(

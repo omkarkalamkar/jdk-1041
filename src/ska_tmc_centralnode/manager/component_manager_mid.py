@@ -86,6 +86,10 @@ from ska_tmc_centralnode.refactored_commands.telescope_on import (
     MidTelescopeOnContext,
     TelescopeOnMid,
 )
+from ska_tmc_centralnode.refactored_commands.telescope_off import (
+    MidTelescopeOffContext,
+    TelescopeOffMid,
+)
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_MID,
     DISH_VCC_CONFIG_INTERFACE_VERSION,
@@ -1013,6 +1017,30 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
             logger=self.logger,
         )
         telescope_on_command.execute(
+            argin=None,
+            task_callback=task_callback,
+            task_abort_event=task_abort_event,
+        )
+
+    def _get_telescope_off_context(self) -> MidTelescopeOffContext:
+        """Build MidTelescopeOffContext bound to this component manager."""
+        return MidTelescopeOffContext(
+            **self._get_common_telescope_off_context_kwargs(),
+            get_dish_devices=self.get_dish_devices,
+        )
+
+    def telescope_off(
+        self,
+        task_callback: TaskCallbackType,
+        task_abort_event=None,
+    ) -> None:
+        """Turn the Telescope Off (Mid – refactored)."""
+        telescope_off_command = TelescopeOffMid(
+            command_runtime_context=self._get_telescope_off_context(),
+            adapter_provider=self.adapter_factory,
+            logger=self.logger,
+        )
+        telescope_off_command.execute(
             argin=None,
             task_callback=task_callback,
             task_abort_event=task_abort_event,

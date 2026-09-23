@@ -44,6 +44,10 @@ from ska_tmc_centralnode.refactored_commands.telescope_on import (
     LowTelescopeOnContext,
     TelescopeOnLow,
 )
+from ska_tmc_centralnode.refactored_commands.telescope_off import (
+    LowTelescopeOffContext,
+    TelescopeOffLow,
+)
 from ska_tmc_centralnode.utils.constants import (
     LOW_ASSIGN_RESOURCES_SCHEMA_VERSION,
     LOW_RELEASE_RESOURCES_SCHEMA_VERSION,
@@ -369,6 +373,31 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
             logger=self.logger,
         )
         telescope_on_command.execute(
+            argin=None,
+            task_callback=task_callback,
+            task_abort_event=task_abort_event,
+        )
+
+    def _get_telescope_off_context(self) -> LowTelescopeOffContext:
+        """Build LowTelescopeOffContext bound to this component manager."""
+        return LowTelescopeOffContext(
+            **self._get_common_telescope_off_context_kwargs(),
+            mccs_mln_dev_name=self.input_parameter.mccs_mln_dev_name,
+            check_if_mccs_mln_is_available=self.check_if_mccs_mln_is_available,
+        )
+
+    def telescope_off(
+        self,
+        task_callback: TaskCallbackType,
+        task_abort_event=None,
+    ) -> None:
+        """Turn the Telescope Off (Low – refactored)."""
+        telescope_off_command = TelescopeOffLow(
+            command_runtime_context=self._get_telescope_off_context(),
+            adapter_provider=self.adapter_factory,
+            logger=self.logger,
+        )
+        telescope_off_command.execute(
             argin=None,
             task_callback=task_callback,
             task_abort_event=task_abort_event,

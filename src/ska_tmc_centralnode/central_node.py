@@ -395,8 +395,8 @@ class AbstractCentralNode(TMCBaseDevice):
     @DebugIt()
     def TelescopeOff(self) -> TaskFunctionType:
         """
-        This command invokes SetStandbyLPMode() command on DishLeafNode, Off()
-        command on CspMasterLeafNode and SdpMasterLeafNode.
+        This command invokes Off() command on DishLeafNode,
+        CspMasterLeafNode and SdpMasterLeafNode.
 
         """
 

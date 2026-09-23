@@ -44,12 +44,12 @@ ska\_tmc\_centralnode.refactored_commands.releaseresources.release\_resources\_c
    :show-inheritance:
 
 
-ska\_tmc\_centralnode.commands.telescope\_off\_command module
--------------------------------------------------------------
+ska\_tmc\_centralnode.refactored\_commands.telescope\_off module
+-----------------------------------------------------------------
 
 .. _telescope_off:
 
-.. automodule:: ska_tmc_centralnode.commands.telescope_off_command
+.. automodule:: ska_tmc_centralnode.refactored_commands.telescope_off
    :members:
    :undoc-members:
    :show-inheritance:
