@@ -135,11 +135,13 @@ def test_telescope_off_command_fail_subarray(
     cm.is_command_allowed("TelescopeOff")
     adapter_factory = HelperAdapterFactory()
 
-    # include exception in TelescopeOff command
+    # include exception in TelescopeOff command for subarray
     failing_dev = LOW_TMC_SUBARRAY
-    attrs = {"TelescopeOff.side_effect": Exception}
-    subarray_mock = mock.Mock(**attrs)
-    adapter_factory.get_or_create_adapter(failing_dev, proxy=subarray_mock)
+    subarray_adapter = adapter_factory.get_or_create_adapter(
+        failing_dev, adapter_type=AdapterType.SUBARRAY
+    )
+    subarray_adapter.invoke_command = mock.Mock(side_effect=Exception("Subarray Off failed"))
+    cm.adapter_factory = adapter_factory
     cm.adapter_factory = adapter_factory
 
     off_command = TelescopeOffLow(
