@@ -9,6 +9,7 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
+from ska_tmc_common.adapters import AdapterType
 
 from ska_tmc_centralnode.model.input import InputParameterLow
 from ska_tmc_centralnode.refactored_commands.telescope_off import (
